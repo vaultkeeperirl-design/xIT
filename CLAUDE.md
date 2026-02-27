@@ -6,6 +6,18 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 xIT (formerly ClipWise/HyperEdit) is an AI-powered video editor built with React 19, Remotion for motion graphics, and Cloudflare Workers for the backend. It's a Mocha platform app.
 
+## Version Control Policy
+
+All AI agents and bots working on this project must follow strict version control.
+The version format is `MAJOR.MINOR.PATCH` (e.g., `1.2.3`).
+
+- **MAJOR** (`X.0.0`): Major updates and breaking changes.
+- **MINOR** (`0.X.0`): New features and significant improvements.
+- **PATCH** (`0.0.X`): Bugfixes, patches, and minor updates.
+
+**CRITICAL RULE:**
+You must **NEVER** submit a Pull Request or commit code without incrementing the version number in `package.json`.
+
 ## Commands
 
 ```bash
