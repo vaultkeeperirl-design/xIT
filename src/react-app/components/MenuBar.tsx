@@ -52,6 +52,7 @@ interface MenuBarProps {
   onTranscribe: () => void;
   onRemoveDeadAir: () => void;
   onOpenAbout: () => void;
+  onToggleReframe?: () => void;
   canUndo?: boolean;
   canRedo?: boolean;
   isProcessing?: boolean;
@@ -95,6 +96,7 @@ export default function MenuBar({
   onTranscribe,
   onRemoveDeadAir,
   onOpenAbout,
+  onToggleReframe,
   canUndo = false,
   canRedo = false,
   isProcessing = false,
@@ -175,6 +177,7 @@ export default function MenuBar({
         { label: 'Zoom Out', icon: <ZoomOut className="w-4 h-4" />, action: () => setActiveMenu(null), shortcut: 'Ctrl+-' },
         { type: 'separator' },
         { label: 'Toggle Fullscreen', icon: <Maximize className="w-4 h-4" />, action: toggleFullScreen, shortcut: 'F11' },
+        { label: 'Auto-Reframe Tool', icon: <Maximize className="w-4 h-4" />, action: () => { onToggleReframe?.(); setActiveMenu(null); } },
       ]
     },
     {

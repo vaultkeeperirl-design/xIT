@@ -14,15 +14,22 @@ import ResizableVerticalPanel from '@/react-app/components/ResizableVerticalPane
 import TimelineTabs from '@/react-app/components/TimelineTabs';
 import MenuBar from '@/react-app/components/MenuBar';
 import AboutModal from '@/react-app/components/AboutModal';
-import { useProject, Asset, TimelineClip, CaptionStyle } from '@/react-app/hooks/useProject';
+import ReframeTool from '@/react-app/components/ReframeTool';
+import { useProject, Asset, TimelineClip, CaptionStyle, FaceTrack } from '@/react-app/hooks/useProject';
 import { useVideoSession } from '@/react-app/hooks/useVideoSession';
-import { Sparkles, ListOrdered, Copy, Check, X, Play, Palette, Film } from 'lucide-react';
+import { Sparkles, ListOrdered, Copy, Check, X, Play, Palette, Film, Target } from 'lucide-react';
 import type { TemplateId } from '@/remotion/templates';
 
 interface ChapterData {
   chapters: Array<{ start: number; title: string }>;
   youtubeFormat: string;
   summary: string;
+}
+
+// Auto-reframe configuration state structure
+interface ReframeState {
+  enabled: boolean;
+  activeFaceTrackId: number | null;
 }
 
 export default function Home() {
@@ -40,6 +47,10 @@ export default function Home() {
   const [showGifSearch, setShowGifSearch] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
   const [showAbout, setShowAbout] = useState(false);
+
+  // Reframe tool state
+  const [showReframeTool, setShowReframeTool] = useState(false);
+  const [reframeConfig, setReframeConfig] = useState<Record<string, ReframeState>>({});
 
   const videoPreviewRef = useRef<VideoPreviewHandle>(null);
   const playbackRef = useRef<number | null>(null);
@@ -71,6 +82,8 @@ export default function Home() {
     addCaptionClipsBatch,
     updateCaptionStyle,
     getCaptionData,
+    // Face tracking
+    faceTrackingData,
     // Timeline tabs
     timelineTabs,
     activeTabId,
@@ -115,6 +128,46 @@ export default function Home() {
       loadProject();
     }
   }, [session, loadProject]);
+
+  // Handle reframe configuration updates
+  const handleEnableReframe = useCallback((clipId: string, trackId: number | null) => {
+    setReframeConfig(prev => ({
+      ...prev,
+      [clipId]: {
+        enabled: trackId !== null,
+        activeFaceTrackId: trackId
+      }
+    }));
+  }, []);
+
+  // Compute current reframe config for preview
+  const currentReframeConfig = useMemo(() => {
+    // Only apply reframe if in 9:16 mode
+    if (aspectRatio !== '9:16') return undefined;
+
+    // Find the active V1 clip at current time
+    const v1Clip = activeClips.find(c =>
+      c.trackId === 'V1' &&
+      currentTime >= c.start &&
+      currentTime < c.start + c.duration
+    );
+
+    if (!v1Clip) return undefined;
+
+    const config = reframeConfig[v1Clip.id];
+    if (!config?.enabled || config.activeFaceTrackId === null) return undefined;
+
+    const asset = assets.find(a => a.id === v1Clip.assetId);
+    if (!asset) return undefined;
+
+    const tracks = faceTrackingData[asset.id];
+    const faceTrack = tracks?.find(t => t.id === config.activeFaceTrackId) || null;
+
+    return {
+      isEnabled: true,
+      faceTrack
+    };
+  }, [aspectRatio, activeClips, currentTime, reframeConfig, assets, faceTrackingData]);
 
   // Get all clips at the current playhead position as layers
   const getPreviewLayers = useCallback(() => {
@@ -1694,6 +1747,7 @@ export default function Home() {
         onTranscribe={handleTranscribeAndAddCaptions}
         onRemoveDeadAir={handleRemoveDeadAir}
         onOpenAbout={() => setShowAbout(true)}
+        onToggleReframe={() => setShowReframeTool(!showReframeTool)}
         canUndo={false} // Undo not implemented yet
         canRedo={false} // Redo not implemented yet
         isProcessing={isProcessing}
@@ -1834,6 +1888,19 @@ export default function Home() {
           </div>
         </ResizablePanel>
 
+        {/* Reframe Tool Panel - Appears between Left and Main if active */}
+        {showReframeTool && selectedClipId && (
+          <div className="border-r border-zinc-800">
+            <ReframeTool
+              clipId={selectedClipId}
+              onClose={() => setShowReframeTool(false)}
+              onEnableReframe={handleEnableReframe}
+              activeFaceTrackId={reframeConfig[selectedClipId]?.activeFaceTrackId ?? null}
+              isEnabled={reframeConfig[selectedClipId]?.enabled ?? false}
+            />
+          </div>
+        )}
+
         {/* Main Editor Area */}
         <div className="flex flex-col flex-1 min-w-0 overflow-hidden">
           {/* Video Preview */}
@@ -1847,6 +1914,7 @@ export default function Home() {
                 onLayerMove={handleLayerMove}
                 onLayerSelect={handleLayerSelect}
                 selectedLayerId={selectedClipId}
+                reframeConfig={currentReframeConfig}
               />
             ) : clips.length > 0 ? (
               // Assets exist but playhead is not over any clip
