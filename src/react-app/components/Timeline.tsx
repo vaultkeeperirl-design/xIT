@@ -31,6 +31,7 @@ interface TimelineProps {
   onUndo?: () => void;
   onRedo?: () => void;
   onAutoReframe?: () => void;
+  onDragStart?: () => void;
 }
 
 const TRACK_HEIGHTS: Record<string, number> = {
@@ -73,6 +74,7 @@ export default function Timeline({
   onUndo,
   onRedo,
   onAutoReframe,
+  onDragStart,
 }: TimelineProps) {
   const [zoom, setZoom] = useState(1);
   const [isDraggingPlayhead, setIsDraggingPlayhead] = useState(false);
@@ -559,6 +561,7 @@ export default function Timeline({
                           onMove={onMoveClip}
                           onResize={onResizeClip}
                           onDelete={onDeleteClip}
+                          onDragStart={onDragStart}
                           onDragEnd={onSave}
                           isCaption={isCaption}
                           captionPreview={captionPreview}
