@@ -1,4 +1,6 @@
-![xIT Logo](src/assets/xit_logo.png)
+<p align="center">
+  <img src="src/assets/xit_logo.png" width="100" alt="xIT Logo">
+</p>
 
 # xIT
 
