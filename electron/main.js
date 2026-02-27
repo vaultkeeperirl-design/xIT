@@ -61,6 +61,7 @@ function createWindow() {
     height: 800,
     show: false, // Don't show until ready
     icon: iconPath,
+    autoHideMenuBar: true, // Hide default menu bar to use custom one
     webPreferences: {
       nodeIntegration: true,
       contextIsolation: false, // For easier IPC initially, consider security later
