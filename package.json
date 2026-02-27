@@ -1,6 +1,6 @@
 {
   "name": "xit",
-  "productName": "xIT",
+  "productName": "xIT Video Studio",
   "description": "An AI-powered video editor",
   "author": "xIT",
   "private": true,
@@ -80,7 +80,7 @@
   },
   "build": {
     "appId": "com.xit.app",
-    "productName": "xIT",
+    "productName": "xIT Video Studio",
     "directories": {
       "output": "release"
     },
