@@ -17,6 +17,20 @@ export interface Asset {
   aiGenerated?: boolean; // True if this is a Remotion-generated animation
 }
 
+// Face Detection Data
+export interface FaceKeyframe {
+  t: number; // timestamp
+  x: number; // center x (0-1)
+  y: number; // center y (0-1)
+  w: number; // width (0-1)
+  h: number; // height (0-1)
+}
+
+export interface FaceTrack {
+  id: number;
+  keyframes: FaceKeyframe[];
+}
+
 // TimelineClip - instance on timeline
 export interface TimelineClip {
   id: string;
@@ -131,6 +145,7 @@ export function useProject() {
   ]);
   const [clips, setClips] = useState<TimelineClip[]>([]);
   const [captionData, setCaptionData] = useState<Record<string, CaptionData>>({});
+  const [faceTrackingData, setFaceTrackingData] = useState<Record<string, FaceTrack[]>>({});
 
   // Timeline tabs for editing clips in isolation
   const [timelineTabs, setTimelineTabs] = useState<TimelineTab[]>([
@@ -721,6 +736,45 @@ export function useProject() {
     return captionData[clipId] || null;
   }, [captionData]);
 
+  // Detect faces in an asset
+  const detectFaces = useCallback(async (assetId: string): Promise<FaceTrack[]> => {
+    if (!session) throw new Error('No session');
+
+    // Return cached results if available
+    if (faceTrackingData[assetId]) {
+      return faceTrackingData[assetId];
+    }
+
+    setLoading(true);
+    setStatus('Detecting faces...');
+
+    try {
+      const response = await fetch(`${LOCAL_FFMPEG_URL}/session/${session.sessionId}/detect-faces`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ assetId }),
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error || 'Face detection failed');
+      }
+
+      const result = await response.json();
+      const tracks = result.tracks || [];
+
+      setFaceTrackingData(prev => ({
+        ...prev,
+        [assetId]: tracks
+      }));
+
+      return tracks;
+    } finally {
+      setLoading(false);
+      setStatus('');
+    }
+  }, [session, faceTrackingData]);
+
   // Save project to server (debounced)
   // Uses refs to always get latest state, avoiding stale closure issues
   const saveProject = useCallback(async (): Promise<void> => {
@@ -999,6 +1053,10 @@ export function useProject() {
     addCaptionClipsBatch,
     updateCaptionStyle,
     getCaptionData,
+
+    // Face Detection
+    detectFaces,
+    faceTrackingData,
 
     // Project
     saveProject,

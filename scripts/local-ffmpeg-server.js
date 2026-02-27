@@ -7959,6 +7959,9 @@ const server = http.createServer(async (req, res) => {
     else if (req.method === 'POST' && action === 'giphy/add') {
       await handleGiphyAdd(req, res, sessionId);
     }
+    else if (req.method === 'POST' && action === 'detect-faces') {
+      await handleDetectFaces(req, res, sessionId);
+    }
     else if (action.startsWith('renders/')) {
       const renderType = action.substring(8); // Remove 'renders/'
       if (req.method === 'GET') {

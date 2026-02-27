@@ -1,7 +1,7 @@
 import { Play, Image as ImageIcon, Layers, Move } from 'lucide-react';
 import { useRef, useEffect, forwardRef, useImperativeHandle, useMemo, useState, useCallback } from 'react';
 import CaptionRenderer from './CaptionRenderer';
-import type { CaptionWord, CaptionStyle } from '@/react-app/hooks/useProject';
+import type { CaptionWord, CaptionStyle, FaceTrack } from '@/react-app/hooks/useProject';
 
 interface ClipTransform {
   x?: number;
@@ -35,6 +35,11 @@ interface VideoPreviewProps {
   onLayerSelect?: (layerId: string) => void;
   onLayerResize?: (layerId: string, scale: number) => void;
   selectedLayerId?: string | null;
+  // Auto-Reframe props
+  reframeConfig?: {
+    isEnabled: boolean;
+    faceTrack: FaceTrack | null;
+  };
 }
 
 export interface VideoPreviewHandle {
@@ -42,20 +47,44 @@ export interface VideoPreviewHandle {
   getVideoElement: () => HTMLVideoElement | null;
 }
 
+// Helper to interpolate value between two keyframes
+function interpolate(t: number, kf1: { t: number, val: number }, kf2: { t: number, val: number }): number {
+  if (t <= kf1.t) return kf1.val;
+  if (t >= kf2.t) return kf2.val;
+
+  const progress = (t - kf1.t) / (kf2.t - kf1.t);
+  // Simple linear interpolation for now
+  return kf1.val + (kf2.val - kf1.val) * progress;
+}
+
 // Helper to build CSS styles from transform
-function getTransformStyles(transform?: ClipTransform, zIndex: number = 0, isDragging?: boolean): React.CSSProperties {
+function getTransformStyles(
+  transform?: ClipTransform,
+  zIndex: number = 0,
+  isDragging?: boolean,
+  reframeOverride?: { x: number, scale: number }
+): React.CSSProperties {
   const t = transform || {};
 
   const transforms: string[] = [];
 
+  // Use reframe override if available, otherwise use clip transform
+  // For reframe, we want to center the face.
+  // Standard transform x/y is offset from center in pixels.
+  // Reframe logic calculates needed offset.
+
+  const x = reframeOverride ? reframeOverride.x : (t.x || 0);
+  const y = t.y || 0; // Vertical reframe usually keeps y=0 unless we want to track vertical movement too
+  const scale = reframeOverride ? reframeOverride.scale : (t.scale || 1);
+
   // Position (translate)
-  if (t.x || t.y) {
-    transforms.push(`translate(${t.x || 0}px, ${t.y || 0}px)`);
+  if (x || y) {
+    transforms.push(`translate(${x}px, ${y}px)`);
   }
 
   // Scale
-  if (t.scale && t.scale !== 1) {
-    transforms.push(`scale(${t.scale})`);
+  if (scale && scale !== 1) {
+    transforms.push(`scale(${scale})`);
   }
 
   // Rotation
@@ -89,6 +118,7 @@ const VideoPreview = forwardRef<VideoPreviewHandle, VideoPreviewProps>(({
   onLayerSelect,
   onLayerResize,
   selectedLayerId,
+  reframeConfig,
 }, ref) => {
   const videoRef = useRef<HTMLVideoElement>(null);
   const loadedSrcRef = useRef<string | null>(null);
@@ -129,6 +159,134 @@ const VideoPreview = forwardRef<VideoPreviewHandle, VideoPreviewProps>(({
     },
     getVideoElement: () => videoRef.current,
   }));
+
+  // Auto-Reframe Calculation
+  const getReframeTransform = useCallback((clipTime: number): { x: number, scale: number } | undefined => {
+    if (!reframeConfig?.isEnabled || !reframeConfig.faceTrack || aspectRatio !== '9:16') {
+      return undefined;
+    }
+
+    const { keyframes } = reframeConfig.faceTrack;
+    if (keyframes.length === 0) return undefined;
+
+    // Find surrounding keyframes
+    // Clip time is in seconds relative to start of clip asset
+    // Keyframes are also relative to asset start
+
+    // Binary search could be faster but linear scan is fine for now
+    let kf1 = keyframes[0];
+    let kf2 = keyframes[keyframes.length - 1];
+
+    for (let i = 0; i < keyframes.length - 1; i++) {
+      if (clipTime >= keyframes[i].t && clipTime < keyframes[i+1].t) {
+        kf1 = keyframes[i];
+        kf2 = keyframes[i+1];
+        break;
+      }
+    }
+
+    // Interpolate face center X (0-1 range)
+    const faceCenterX = interpolate(
+      clipTime,
+      { t: kf1.t, val: kf1.x },
+      { t: kf2.t, val: kf2.x }
+    );
+
+    // Calculate transform needed to center this X coordinate
+    // Video preview container dimensions depend on CSS, but logic handles relative scale
+
+    // In 9:16 mode, we typically scale the video to fill height (cover)
+    // For a 16:9 video in a 9:16 frame:
+    // Scale = (9/16) / (16/9) is wrong.
+    // We want video height = container height.
+    // Video width = video height * (16/9)
+    // Container width = container height * (9/16)
+    // Ratio of Widths = (16/9) / (9/16) = 3.16
+    // So the video is ~3.16x wider than the container when fitting height.
+
+    // Let's assume standard "cover" behavior where height matches (scale=1 relative to cover)
+    // We just need to shift X.
+
+    // faceCenterX is 0-1 (relative to video width).
+    // Center of video is 0.5.
+    // If face is at 0.7, we need to shift video LEFT by (0.7 - 0.5) * videoWidth
+
+    // Container width (CW)
+    // Video width (VW)
+    // We want faceCenterX * VW to be at CW / 2
+    // offset = (CW/2) - (faceCenterX * VW)
+
+    // If we assume the viewer renders video such that height fits container:
+    // VW = VH * (16/9)
+    // CW = VH * (9/16)
+    // VW = CW * (16/9) / (9/16) = CW * (256/81) ≈ 3.16 * CW
+
+    // Let's verify pixel-based transform logic in VideoPreview.
+    // Transform `x` is translation in pixels.
+    // If we don't know pixel size here, we might need a ref to container dimensions.
+
+    const container = containerRef.current;
+    if (!container) return undefined;
+
+    const containerW = container.clientWidth;
+    const containerH = container.clientHeight;
+
+    // Assuming source video is 16:9 and fits height-wise (cover behavior)
+    // Actually, typical <video> behavior with object-fit: contain puts it in middle.
+    // But for reframe we likely want to scale it up to cover height.
+
+    const videoAspect = 16/9;
+    const targetVideoHeight = containerH;
+    const targetVideoWidth = targetVideoHeight * videoAspect;
+
+    // Center of the face in pixel coordinates relative to video top-left
+    const facePixelX = faceCenterX * targetVideoWidth;
+
+    // We want this pixel to be at container center (containerW / 2)
+    // The video is by default centered?
+    // <video> is absolute inset-0 w-full h-full.
+    // If we apply scale, it scales from center.
+
+    // Let's assume we start with video centered.
+    // Center of video is at container center.
+    // Center of video X coord is targetVideoWidth / 2.
+    // Face is at facePixelX.
+    // Distance from video center = facePixelX - (targetVideoWidth / 2).
+    // We need to shift opposite direction: -(facePixelX - targetVideoWidth / 2).
+
+    const xOffset = -(facePixelX - (targetVideoWidth / 2));
+
+    // Limit offset so we don't show black bars
+    // Max shift left: right edge of video touches right edge of container
+    // Max shift right: left edge of video touches left edge of container
+
+    // Video width > Container width
+    const maxOffset = (targetVideoWidth - containerW) / 2;
+    const clampedOffset = Math.max(-maxOffset, Math.min(maxOffset, xOffset));
+
+    // Calculate Scale needed to fill height
+    // Container is 9:16. Video is 16:9.
+    // To fill height, scale = 1 (if object-fit was cover, but it is contain in component?)
+    // In component: `className="absolute inset-0 w-full h-full object-contain"`
+    // So video fits inside. For 9:16 container, 16:9 video will define width and leave gaps top/bottom?
+    // Wait, 16:9 video in 9:16 container:
+    // Video will fit WIDTH (small), leaving huge gaps top/bottom.
+    // To fill height, we need to scale up significantly.
+    // Scale = ContainerHeight / VideoHeight
+    // VideoHeight (rendered) = ContainerWidth / (16/9)
+    // Scale = ContainerHeight / (ContainerWidth * 9/16)
+    // Since ContainerHeight/ContainerWidth = 16/9
+    // Scale = (16/9) / (9/16) = (16/9)^2 ≈ 3.16
+
+    // Standard reframe usually implies "Cover" mode.
+    // So we need a base scale that makes it cover.
+    const baseScale = (16/9) / (9/16);
+
+    return {
+      x: clampedOffset,
+      scale: baseScale // Apply this base scale + any tracking scale (tracking scale usually 1 unless zooming)
+    };
+  }, [reframeConfig, aspectRatio]);
 
   // Reload video when source URL changes (e.g., after dead air removal)
   // Using stable key + manual load() preserves the audio permission from user gesture
@@ -311,6 +469,11 @@ const VideoPreview = forwardRef<VideoPreviewHandle, VideoPreviewProps>(({
     [sortedLayers]
   );
 
+  // Apply reframe to V1 layer if active
+  const reframeTransform = foundBaseLayer && foundBaseLayer.trackId === 'V1' && reframeConfig?.isEnabled
+    ? getReframeTransform(foundBaseLayer.clipTime)
+    : undefined;
+
   return (
     <div
       ref={containerRef}
@@ -323,7 +486,11 @@ const VideoPreview = forwardRef<VideoPreviewHandle, VideoPreviewProps>(({
           ref={videoRef}
           src={foundBaseLayer.url}
           className={`absolute inset-0 w-full h-full ${videoFitClass}`}
-          style={{ zIndex: 1 }}
+          style={{
+            zIndex: 1,
+            // Apply reframe styles if enabled, otherwise regular styles
+            ...getTransformStyles(foundBaseLayer.transform, 1, false, reframeTransform)
+          }}
           playsInline
           preload="auto"
           onLoadedData={handleLoaded}
