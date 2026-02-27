@@ -8,6 +8,7 @@ import {
   Settings,
   Palette,
   Wand2,
+  ScanFace,
 } from 'lucide-react';
 
 interface ToolbarProps {
@@ -16,6 +17,7 @@ interface ToolbarProps {
   onDelete?: () => void;
   onUndo?: () => void;
   onRedo?: () => void;
+  onAutoReframe?: () => void;
 }
 
 export default function Toolbar({
@@ -24,6 +26,7 @@ export default function Toolbar({
   onDelete,
   onUndo,
   onRedo,
+  onAutoReframe,
 }: ToolbarProps) {
   const tools = [
     { icon: Scissors, label: 'Split', shortcut: 'S', onClick: onSplit },
@@ -34,6 +37,7 @@ export default function Toolbar({
     { icon: Volume2, label: 'Audio', shortcut: 'A', onClick: undefined },
     { icon: Palette, label: 'Color', shortcut: 'C', onClick: undefined },
     { icon: Wand2, label: 'Effects', shortcut: 'E', onClick: undefined },
+    { icon: ScanFace, label: 'Auto Reframe', shortcut: 'F', onClick: onAutoReframe },
     { icon: Settings, label: 'Settings', shortcut: ',', onClick: undefined },
   ];
 

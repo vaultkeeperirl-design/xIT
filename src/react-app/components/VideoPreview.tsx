@@ -38,7 +38,9 @@ interface VideoPreviewProps {
   // Auto-Reframe props
   reframeConfig?: {
     isEnabled: boolean;
+    mode: 'single' | 'group';
     faceTrack: FaceTrack | null;
+    allFaceTracks?: FaceTrack[];
   };
 }
 
@@ -162,35 +164,74 @@ const VideoPreview = forwardRef<VideoPreviewHandle, VideoPreviewProps>(({
 
   // Auto-Reframe Calculation
   const getReframeTransform = useCallback((clipTime: number): { x: number, scale: number } | undefined => {
-    if (!reframeConfig?.isEnabled || !reframeConfig.faceTrack || aspectRatio !== '9:16') {
+    if (!reframeConfig?.isEnabled || aspectRatio !== '9:16') {
       return undefined;
     }
 
-    const { keyframes } = reframeConfig.faceTrack;
-    if (keyframes.length === 0) return undefined;
+    let faceCenterX = 0.5;
 
-    // Find surrounding keyframes
-    // Clip time is in seconds relative to start of clip asset
-    // Keyframes are also relative to asset start
+    if (reframeConfig.mode === 'group' && reframeConfig.allFaceTracks && reframeConfig.allFaceTracks.length > 0) {
+      let activeFaces = 0;
+      let totalX = 0;
 
-    // Binary search could be faster but linear scan is fine for now
-    let kf1 = keyframes[0];
-    let kf2 = keyframes[keyframes.length - 1];
+      for (const track of reframeConfig.allFaceTracks) {
+        const { keyframes } = track;
+        if (keyframes.length === 0) continue;
 
-    for (let i = 0; i < keyframes.length - 1; i++) {
-      if (clipTime >= keyframes[i].t && clipTime < keyframes[i+1].t) {
-        kf1 = keyframes[i];
-        kf2 = keyframes[i+1];
-        break;
+        // Check if face is active at this time
+        if (clipTime >= keyframes[0].t && clipTime <= keyframes[keyframes.length - 1].t) {
+          let kf1 = keyframes[0];
+          let kf2 = keyframes[keyframes.length - 1];
+
+          for (let i = 0; i < keyframes.length - 1; i++) {
+            if (clipTime >= keyframes[i].t && clipTime < keyframes[i+1].t) {
+              kf1 = keyframes[i];
+              kf2 = keyframes[i+1];
+              break;
+            }
+          }
+
+          const trackX = interpolate(
+            clipTime,
+            { t: kf1.t, val: kf1.x },
+            { t: kf2.t, val: kf2.x }
+          );
+
+          totalX += trackX;
+          activeFaces++;
+        }
       }
-    }
 
-    // Interpolate face center X (0-1 range)
-    const faceCenterX = interpolate(
-      clipTime,
-      { t: kf1.t, val: kf1.x },
-      { t: kf2.t, val: kf2.x }
-    );
+      if (activeFaces > 0) {
+        faceCenterX = totalX / activeFaces;
+      } else {
+        return undefined; // No faces active
+      }
+    } else if (reframeConfig.mode === 'single' && reframeConfig.faceTrack) {
+      const { keyframes } = reframeConfig.faceTrack;
+      if (keyframes.length === 0) return undefined;
+
+      // Find surrounding keyframes
+      let kf1 = keyframes[0];
+      let kf2 = keyframes[keyframes.length - 1];
+
+      for (let i = 0; i < keyframes.length - 1; i++) {
+        if (clipTime >= keyframes[i].t && clipTime < keyframes[i+1].t) {
+          kf1 = keyframes[i];
+          kf2 = keyframes[i+1];
+          break;
+        }
+      }
+
+      // Interpolate face center X (0-1 range)
+      faceCenterX = interpolate(
+        clipTime,
+        { t: kf1.t, val: kf1.x },
+        { t: kf2.t, val: kf2.x }
+      );
+    } else {
+      return undefined;
+    }
 
     // Calculate transform needed to center this X coordinate
     // Video preview container dimensions depend on CSS, but logic handles relative scale
