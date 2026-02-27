@@ -239,7 +239,7 @@ export default function Timeline({
               onClick={onPlayPause}
               className={`p-1.5 rounded transition-colors ${
                 isPlaying
-                  ? 'bg-brand-500 hover:bg-brand-600 text-white'
+                  ? 'bg-brand-500 hover:bg-brand-600 text-zinc-900'
                   : 'bg-zinc-700 hover:bg-zinc-600'
               }`}
               title={isPlaying ? 'Pause' : 'Play'}

@@ -140,7 +140,7 @@ export default function GifSearchPanel({ sessionId, onClose, onGifAdded }: GifSe
             <button
               type="submit"
               disabled={loading}
-              className="px-4 py-2.5 bg-brand-600 hover:bg-brand-500 disabled:opacity-50 text-white font-medium rounded-lg transition-colors"
+              className="px-4 py-2.5 bg-brand-600 hover:bg-brand-500 disabled:opacity-50 text-zinc-900 font-medium rounded-lg transition-colors"
             >
               Search
             </button>

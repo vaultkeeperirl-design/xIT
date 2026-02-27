@@ -2398,7 +2398,7 @@ export default function AIPromptPanel({
                           >
                             <span className="text-lg">{option.icon}</span>
                             <div className="flex-1 min-w-0">
-                              <div className="text-sm font-medium text-white group-hover:text-brand-400 transition-colors">
+                              <div className="text-sm font-medium text-white group-hover:text-brand-300 transition-colors">
                                 {option.label}
                               </div>
                               <div className="text-xs text-zinc-400 mt-0.5">
@@ -2928,7 +2928,7 @@ export default function AIPromptPanel({
                       <button
                         type="button"
                         onClick={applyTimeRange}
-                        className="flex-1 px-2 py-1.5 bg-brand-500 hover:bg-brand-600 rounded text-xs text-white font-medium transition-colors"
+                          className="flex-1 px-2 py-1.5 bg-brand-500 hover:bg-brand-600 rounded text-xs text-zinc-900 font-medium transition-colors"
                       >
                         Apply
                       </button>

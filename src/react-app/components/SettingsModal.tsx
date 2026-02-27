@@ -152,7 +152,7 @@ export default function SettingsModal({ onClose, onSave, initialSettingsPromise 
             type="submit"
             form="settings-form"
             disabled={saving || loading}
-            className="px-4 py-2 bg-gradient-to-r from-brand-500 to-amber-500 hover:from-brand-600 hover:to-amber-600 text-white rounded-lg text-sm font-medium transition-all flex items-center gap-2"
+            className="px-4 py-2 bg-gradient-to-r from-brand-500 to-brand-400 hover:from-brand-600 hover:to-brand-500 text-zinc-900 rounded-lg text-sm font-medium transition-all flex items-center gap-2"
           >
             {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Check className="w-4 h-4" />}
             Save Changes

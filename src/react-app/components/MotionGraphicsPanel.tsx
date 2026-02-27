@@ -342,7 +342,7 @@ export default function MotionGraphicsPanel({ onAddToTimeline }: MotionGraphicsP
                   onClick={() => handleUpdateProp('style', style)}
                   className={`px-3 py-1.5 rounded text-xs font-medium transition-colors ${
                     templateProps.style === style
-                      ? 'bg-brand-500 text-white'
+                      ? 'bg-brand-500 text-zinc-900'
                       : 'bg-zinc-800 text-zinc-300 hover:bg-zinc-700'
                   }`}
                 >
@@ -364,7 +364,7 @@ export default function MotionGraphicsPanel({ onAddToTimeline }: MotionGraphicsP
                   onClick={() => handleUpdateProp('type', type)}
                   className={`px-3 py-1.5 rounded text-xs font-medium transition-colors ${
                     templateProps.type === type
-                      ? 'bg-brand-500 text-white'
+                      ? 'bg-brand-500 text-zinc-900'
                       : 'bg-zinc-800 text-zinc-300 hover:bg-zinc-700'
                   }`}
                 >
@@ -386,7 +386,7 @@ export default function MotionGraphicsPanel({ onAddToTimeline }: MotionGraphicsP
                   onClick={() => handleUpdateProp('effect', effect)}
                   className={`px-3 py-1.5 rounded text-xs font-medium transition-colors ${
                     templateProps.effect === effect
-                      ? 'bg-brand-500 text-white'
+                      ? 'bg-brand-500 text-zinc-900'
                       : 'bg-zinc-800 text-zinc-300 hover:bg-zinc-700'
                   }`}
                 >
@@ -408,7 +408,7 @@ export default function MotionGraphicsPanel({ onAddToTimeline }: MotionGraphicsP
                   onClick={() => handleUpdateProp('frameType', frameType)}
                   className={`px-3 py-1.5 rounded text-xs font-medium transition-colors ${
                     templateProps.frameType === frameType
-                      ? 'bg-brand-500 text-white'
+                      ? 'bg-brand-500 text-zinc-900'
                       : 'bg-zinc-800 text-zinc-300 hover:bg-zinc-700'
                   }`}
                 >
