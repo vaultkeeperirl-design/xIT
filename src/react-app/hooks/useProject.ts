@@ -499,11 +499,20 @@ export function useProject() {
     // Continuous action, no snapshot.
     setClipsInternal((prev: TimelineClip[]) => prev.map(c => {
       if (c.id !== clipId) return c;
-      const newDuration = newOutPoint - newInPoint;
+
+      let safeOutPoint = newOutPoint;
+      const minDuration = 0.1;
+
+      if (safeOutPoint - newInPoint < minDuration) {
+        safeOutPoint = newInPoint + minDuration;
+      }
+
+      const newDuration = safeOutPoint - newInPoint;
+
       return {
         ...c,
         inPoint: newInPoint,
-        outPoint: newOutPoint,
+        outPoint: safeOutPoint,
         duration: newDuration,
       };
     }));
