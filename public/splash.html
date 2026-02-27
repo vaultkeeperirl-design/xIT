@@ -78,7 +78,7 @@
     <div class="container">
         <img src="icon.png" alt="xIT Video Studio Logo" class="logo">
         <h1>xIT Video Studio</h1>
-        <p>Version 0.0.5</p>
+        <p id="version-text">Version </p>
 
         <div class="loader">
             <div id="loader-bar" class="loader-bar"></div>
@@ -99,6 +99,10 @@
 
             window.electron.onStatus((status) => {
                 statusText.innerText = status;
+            });
+
+            window.electron.onVersion((version) => {
+                document.getElementById('version-text').innerText = 'Version ' + version;
             });
         } else {
             // Fallback for browser testing
