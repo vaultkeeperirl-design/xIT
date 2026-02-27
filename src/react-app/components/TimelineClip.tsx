@@ -13,6 +13,7 @@ interface TimelineClipProps {
   onResize: (id: string, newInPoint: number, newOutPoint: number, newStart?: number) => void;
   onDragEnd: () => void;
   onDelete: (id: string) => void;
+  onDragStart?: () => void;
   captionPreview?: string;  // For caption clips - first few words
   isCaption?: boolean;       // Whether this is a caption clip
 }
@@ -48,6 +49,7 @@ const TimelineClip = memo(function TimelineClip({
   onResize,
   onDragEnd,
   onDelete,
+  onDragStart,
   captionPreview,
   isCaption = false,
 }: TimelineClipProps) {
@@ -75,6 +77,9 @@ const TimelineClip = memo(function TimelineClip({
     const rect = clipRef.current?.getBoundingClientRect();
     if (!rect) return;
 
+    // Call onDragStart before any drag operation begins
+    onDragStart?.();
+
     const clickX = e.clientX - rect.left;
     const handleWidth = 8;
 
@@ -98,7 +103,7 @@ const TimelineClip = memo(function TimelineClip({
 
     e.preventDefault();
     e.stopPropagation();
-  }, [clip.inPoint, clip.outPoint, clip.start]);
+  }, [clip.inPoint, clip.outPoint, clip.start, onDragStart]);
 
   // Handle mouse move for dragging/resizing
   useEffect(() => {
@@ -196,6 +201,8 @@ const TimelineClip = memo(function TimelineClip({
         className="absolute left-0 top-0 bottom-0 w-2 cursor-ew-resize hover:bg-brand-400/30 rounded-l-md z-10"
         onMouseDown={(e) => {
           e.stopPropagation();
+          // Call onDragStart for resize operations too
+          onDragStart?.();
           setIsResizingLeft(true);
           setDragStartX(e.clientX);
           setInitialInPoint(clip.inPoint);
@@ -243,6 +250,8 @@ const TimelineClip = memo(function TimelineClip({
         className="absolute right-0 top-0 bottom-0 w-2 cursor-ew-resize hover:bg-brand-400/30 rounded-r-md z-10"
         onMouseDown={(e) => {
           e.stopPropagation();
+          // Call onDragStart for resize operations too
+          onDragStart?.();
           setIsResizingRight(true);
           setDragStartX(e.clientX);
           setInitialOutPoint(clip.outPoint);

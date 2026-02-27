@@ -26,6 +26,7 @@ interface TimelineProps {
   onToggleAutoSnap?: () => void;
   onDropAsset: (asset: Asset, trackId: string, time: number) => void;
   onSave: () => void;
+  onDragStart?: () => void;
   getCaptionData?: (clipId: string) => CaptionData | null;
 }
 
@@ -64,6 +65,7 @@ export default function Timeline({
   onToggleAutoSnap,
   onDropAsset,
   onSave,
+  onDragStart,
   getCaptionData,
 }: TimelineProps) {
   const [zoom, setZoom] = useState(1);
@@ -489,6 +491,7 @@ export default function Timeline({
                           onResize={onResizeClip}
                           onDelete={onDeleteClip}
                           onDragEnd={onSave}
+                          onDragStart={onDragStart}
                           isCaption={isCaption}
                           captionPreview={captionPreview}
                         />

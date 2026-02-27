@@ -1,4 +1,5 @@
 import { useState, useCallback, useRef, useEffect } from 'react';
+import { useHistory } from './useHistory';
 
 const LOCAL_FFMPEG_URL = 'http://localhost:3333';
 const SESSION_STORAGE_KEY = 'clipwise-session';
@@ -129,7 +130,19 @@ export function useProject() {
     { id: 'A1', type: 'audio', name: 'A1', order: 4 },  // Audio track 1
     { id: 'A2', type: 'audio', name: 'A2', order: 5 },  // Audio track 2
   ]);
-  const [clips, setClips] = useState<TimelineClip[]>([]);
+
+  // Use history hook for clips
+  const {
+    state: clips,
+    set: setClips,
+    setTemp: setClipsTemp,
+    snapshot: snapshotClips,
+    undo,
+    redo,
+    canUndo,
+    canRedo
+  } = useHistory<TimelineClip[]>([]);
+
   const [captionData, setCaptionData] = useState<Record<string, CaptionData>>({});
 
   // Timeline tabs for editing clips in isolation
@@ -320,7 +333,7 @@ export function useProject() {
 
     setAssets(prev => prev.filter(a => a.id !== assetId));
     setClips(prev => prev.filter(c => c.assetId !== assetId));
-  }, [session]);
+  }, [session, setClips]);
 
   // Get asset stream URL
   const getAssetStreamUrl = useCallback((assetId: string): string | null => {
@@ -405,14 +418,14 @@ export function useProject() {
 
     setClips(prev => [...prev, clip]);
     return clip;
-  }, [assets]);
+  }, [assets, setClips]);
 
-  // Update clip
+  // Update clip - Standard update (records history)
   const updateClip = useCallback((clipId: string, updates: Partial<TimelineClip>): void => {
     setClips(prev => prev.map(c =>
       c.id === clipId ? { ...c, ...updates } : c
     ));
-  }, []);
+  }, [setClips]);
 
   // Delete clip (with optional ripple/autosnap to shift subsequent clips)
   const deleteClip = useCallback((clipId: string, ripple: boolean = false): void => {
@@ -440,11 +453,11 @@ export function useProject() {
         return c;
       });
     });
-  }, []);
+  }, [setClips]);
 
-  // Move clip
+  // Move clip - Temporary update (no history until drag ends)
   const moveClip = useCallback((clipId: string, newStart: number, newTrackId?: string): void => {
-    setClips(prev => prev.map(c => {
+    setClipsTemp(prev => prev.map(c => {
       if (c.id !== clipId) return c;
       return {
         ...c,
@@ -452,11 +465,11 @@ export function useProject() {
         trackId: newTrackId ?? c.trackId,
       };
     }));
-  }, []);
+  }, [setClipsTemp]);
 
-  // Resize clip (change in/out points or duration)
+  // Resize clip - Temporary update (no history until drag ends)
   const resizeClip = useCallback((clipId: string, newInPoint: number, newOutPoint: number): void => {
-    setClips(prev => prev.map(c => {
+    setClipsTemp(prev => prev.map(c => {
       if (c.id !== clipId) return c;
       const newDuration = newOutPoint - newInPoint;
       return {
@@ -466,7 +479,7 @@ export function useProject() {
         duration: newDuration,
       };
     }));
-  }, []);
+  }, [setClipsTemp]);
 
   // Split clip at a specific time, creating two clips
   const splitClip = useCallback((clipId: string, splitTime: number): string | null => {
@@ -510,7 +523,7 @@ export function useProject() {
     ]);
 
     return secondClip.id;
-  }, [clips]);
+  }, [clips, setClips]);
 
   // Create a new timeline tab for editing a clip/animation in isolation
   const createTimelineTab = useCallback((name: string, assetId: string, initialClips?: TimelineClip[]): string => {
@@ -661,7 +674,7 @@ export function useProject() {
     setCaptionData(prev => ({ ...prev, [clipId]: captionInfo }));
 
     return clip;
-  }, []);
+  }, [setClips]);
 
   // Add multiple caption clips at once (batched for performance)
   const addCaptionClipsBatch = useCallback((
@@ -699,7 +712,7 @@ export function useProject() {
     setCaptionData(prev => ({ ...prev, ...newCaptionData }));
 
     return newClips;
-  }, []);
+  }, [setClips]);
 
   // Update caption style
   const updateCaptionStyle = useCallback((clipId: string, styleUpdates: Partial<CaptionStyle>): void => {
@@ -800,7 +813,7 @@ export function useProject() {
     } catch (error) {
       console.error('[Project] Load failed:', error);
     }
-  }, [session]);
+  }, [session, setClips]);
 
   // Render project
   // Uses refs to always get latest state
@@ -916,7 +929,7 @@ export function useProject() {
     setSession(null);
     setAssets([]);
     setClips([]);
-  }, [session]);
+  }, [session, setClips]);
 
   // Get system settings (API keys)
   const getSystemSettings = useCallback(async (): Promise<Record<string, boolean>> => {
@@ -989,6 +1002,7 @@ export function useProject() {
     moveClip,
     resizeClip,
     splitClip,
+    snapshotClips, // Exposed from useHistory
 
     // Captions
     captionData,
@@ -1021,5 +1035,11 @@ export function useProject() {
     // System Settings
     getSystemSettings,
     saveSystemSettings,
+
+    // Undo/Redo
+    undo,
+    redo,
+    canUndo,
+    canRedo,
   };
 }

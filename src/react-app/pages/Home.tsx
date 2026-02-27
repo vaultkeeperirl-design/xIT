@@ -83,6 +83,11 @@ export default function Home() {
     setSettings,
     getSystemSettings,
     saveSystemSettings,
+    undo,
+    redo,
+    canUndo,
+    canRedo,
+    snapshotClips,
   } = useProject();
 
   // Compute the active clips based on which tab is selected
@@ -1694,8 +1699,10 @@ export default function Home() {
         onTranscribe={handleTranscribeAndAddCaptions}
         onRemoveDeadAir={handleRemoveDeadAir}
         onOpenAbout={() => setShowAbout(true)}
-        canUndo={false} // Undo not implemented yet
-        canRedo={false} // Redo not implemented yet
+        canUndo={canUndo}
+        canRedo={canRedo}
+        onUndo={undo}
+        onRedo={redo}
         isProcessing={isProcessing}
         hasProject={!!session || !!legacySession}
         hasClips={clips.length > 0}
@@ -1896,6 +1903,7 @@ export default function Home() {
               onToggleAutoSnap={() => setAutoSnap(prev => !prev)}
               onDropAsset={handleDropAsset}
               onSave={saveProject}
+              onDragStart={snapshotClips}
               getCaptionData={getCaptionData}
             />
           </ResizableVerticalPanel>
