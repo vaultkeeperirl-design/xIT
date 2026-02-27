@@ -22,17 +22,6 @@ xIT is distributed as a standalone Windows application.
 2.  **Install:** Run the setup file to install xIT Video Studio on your system.
 3.  **Launch:** Open xIT from your desktop or start menu.
 
-## Configuration
-
-To use the AI features, you may need to configure your API keys within the application settings or by creating a `.dev.vars` file in the application's data directory:
-
-```env
-GEMINI_API_KEY=your_gemini_key
-OPENAI_API_KEY=your_openai_key
-FAL_KEY=your_fal_ai_key
-GIPHY_API_KEY=your_giphy_key
-```
-
 ## Architecture
 
 *   **Frontend:** React 19, TailwindCSS, Vite.
