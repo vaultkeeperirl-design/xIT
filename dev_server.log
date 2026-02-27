@@ -8,3 +8,4 @@
   ➜  Local:   http://localhost:5173/
   ➜  Network: use --host to expose
   ➜  Debug:   http://localhost:5173/__debug
+8:04:23 AM [vite] (client) hmr update /src/react-app/index.css, /src/react-app/components/AIPromptPanel.tsx

@@ -2299,7 +2299,7 @@ export default function AIPromptPanel({
           <div className="w-8 h-8 bg-gradient-to-br from-orange-500 to-amber-500 rounded-lg flex items-center justify-center">
             <Sparkles className="w-4 h-4" />
           </div>
-          <h2 className="font-semibold">HyperEdit AI</h2>
+          <h2 className="font-semibold">xIT AI</h2>
         </div>
         <p className="text-xs text-zinc-400">
           Describe what you want to do with your video
