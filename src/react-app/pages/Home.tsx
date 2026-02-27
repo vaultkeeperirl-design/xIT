@@ -13,7 +13,6 @@ import ResizablePanel from '@/react-app/components/ResizablePanel';
 import ResizableVerticalPanel from '@/react-app/components/ResizableVerticalPanel';
 import TimelineTabs from '@/react-app/components/TimelineTabs';
 import MenuBar from '@/react-app/components/MenuBar';
-import Toolbar from '@/react-app/components/Toolbar';
 import AboutModal from '@/react-app/components/AboutModal';
 import ReframeTool from '@/react-app/components/ReframeTool';
 import { useProject, Asset, TimelineClip, CaptionStyle } from '@/react-app/hooks/useProject';
@@ -1990,16 +1989,6 @@ export default function Home() {
             )}
           </div>
 
-          {/* Toolbar */}
-          <Toolbar
-            onSplit={handleCutAtPlayhead}
-            onDelete={() => selectedClipId && handleDeleteClip(selectedClipId)}
-            onDuplicate={() => {}}
-            onUndo={() => {}}
-            onRedo={() => {}}
-            onAutoReframe={() => setShowReframeTool(!showReframeTool)}
-          />
-
           {/* Timeline - Resizable height */}
           <ResizableVerticalPanel
             defaultHeight={224}
@@ -2032,6 +2021,10 @@ export default function Home() {
               onDropAsset={handleDropAsset}
               onSave={saveProject}
               getCaptionData={getCaptionData}
+              onDuplicate={() => {}}
+              onUndo={() => {}}
+              onRedo={() => {}}
+              onAutoReframe={() => setShowReframeTool(!showReframeTool)}
               onDragStart={snapshotClips}
             />
           </ResizableVerticalPanel>
