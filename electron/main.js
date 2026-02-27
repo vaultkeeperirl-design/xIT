@@ -10,17 +10,56 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 let mainWindow;
+let splashWindow;
 let serverProcess;
+
+function createSplashWindow() {
+  const iconPath = isDev
+    ? path.join(__dirname, '../public/icon.png')
+    : path.join(__dirname, '../dist/client/icon.png');
+
+  splashWindow = new BrowserWindow({
+    width: 500,
+    height: 300,
+    transparent: true,
+    frame: false,
+    alwaysOnTop: true,
+    icon: iconPath,
+    webPreferences: {
+      nodeIntegration: false,
+      contextIsolation: true
+    }
+  });
+
+  if (isDev) {
+    splashWindow.loadFile(path.join(__dirname, '../public/splash.html'));
+  } else {
+    // In production, splash.html will be in the same folder as index.html
+    // because we will configure electron-builder to copy it there
+    // OR we can copy it to dist/client during build.
+    // For now, let's assume it ends up in dist/client/splash.html or resources.
+    // Actually, simple way: load from extraResources or adjacent to main bundle.
+    // Let's assume we copy public/splash.html to dist/client/splash.html
+    splashWindow.loadFile(path.join(__dirname, '../dist/client/splash.html'));
+  }
+
+  splashWindow.center();
+  splashWindow.on('closed', () => {
+    splashWindow = null;
+  });
+}
 
 function createWindow() {
   const iconPath = isDev
     ? path.join(__dirname, '../public/icon.png')
     : path.join(__dirname, '../dist/client/icon.png');
 
+  // Create the browser window.
   mainWindow = new BrowserWindow({
     title: "xIT Video Studio",
     width: 1280,
     height: 800,
+    show: false, // Don't show until ready
     icon: iconPath,
     webPreferences: {
       nodeIntegration: true,
@@ -35,6 +74,14 @@ function createWindow() {
     // In production, load the built React app
     mainWindow.loadFile(path.join(__dirname, '../dist/client/index.html'));
   }
+
+  // Wait for the window to be ready to show
+  mainWindow.once('ready-to-show', () => {
+    if (splashWindow) {
+      splashWindow.close();
+    }
+    mainWindow.show();
+  });
 
   mainWindow.on('closed', () => {
     mainWindow = null;
@@ -96,6 +143,7 @@ function startServer() {
 
 app.on('ready', () => {
   startServer();
+  createSplashWindow();
   createWindow();
 });
 
