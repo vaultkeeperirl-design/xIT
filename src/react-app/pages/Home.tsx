@@ -31,6 +31,7 @@ interface ChapterData {
 interface ReframeState {
   enabled: boolean;
   activeFaceTrackId: number | null;
+  mode: 'single' | 'group';
 }
 
 export default function Home() {
@@ -131,14 +132,17 @@ export default function Home() {
   }, [session, loadProject]);
 
   // Handle reframe configuration updates
-  const handleEnableReframe = useCallback((clipId: string, trackId: number | null) => {
-    setReframeConfig(prev => ({
-      ...prev,
-      [clipId]: {
-        enabled: trackId !== null,
-        activeFaceTrackId: trackId
-      }
-    }));
+  const handleUpdateReframeConfig = useCallback((clipId: string, configUpdates: Partial<ReframeState>) => {
+    setReframeConfig(prev => {
+      const current = prev[clipId] || { enabled: false, activeFaceTrackId: null, mode: 'single' };
+      return {
+        ...prev,
+        [clipId]: {
+          ...current,
+          ...configUpdates
+        }
+      };
+    });
   }, []);
 
   // Compute current reframe config for preview
@@ -156,17 +160,19 @@ export default function Home() {
     if (!v1Clip) return undefined;
 
     const config = reframeConfig[v1Clip.id];
-    if (!config?.enabled || config.activeFaceTrackId === null) return undefined;
+    if (!config?.enabled || (!config.activeFaceTrackId && config.mode === 'single')) return undefined;
 
     const asset = assets.find(a => a.id === v1Clip.assetId);
     if (!asset) return undefined;
 
-    const tracks = faceTrackingData[asset.id];
-    const faceTrack = tracks?.find(t => t.id === config.activeFaceTrackId) || null;
+    const tracks = faceTrackingData[asset.id] || [];
+    const faceTrack = tracks.find(t => t.id === config.activeFaceTrackId) || null;
 
     return {
       isEnabled: true,
-      faceTrack
+      mode: config.mode,
+      faceTrack,
+      allFaceTracks: tracks
     };
   }, [aspectRatio, activeClips, currentTime, reframeConfig, assets, faceTrackingData]);
 
@@ -1924,9 +1930,10 @@ export default function Home() {
             <ReframeTool
               clipId={selectedClipId}
               onClose={() => setShowReframeTool(false)}
-              onEnableReframe={handleEnableReframe}
+              onUpdateConfiguration={handleUpdateReframeConfig}
               activeFaceTrackId={reframeConfig[selectedClipId]?.activeFaceTrackId ?? null}
               isEnabled={reframeConfig[selectedClipId]?.enabled ?? false}
+              mode={reframeConfig[selectedClipId]?.mode ?? 'single'}
             />
           </div>
         )}
@@ -1971,6 +1978,7 @@ export default function Home() {
             onDuplicate={() => {}}
             onUndo={() => {}}
             onRedo={() => {}}
+            onAutoReframe={() => setShowReframeTool(!showReframeTool)}
           />
 
           {/* Timeline - Resizable height */}

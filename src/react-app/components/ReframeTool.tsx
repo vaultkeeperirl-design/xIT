@@ -1,21 +1,23 @@
 import { useState, useMemo } from 'react';
-import { User, RefreshCw, X, Check, Target, ToggleLeft, ToggleRight } from 'lucide-react';
+import { User, Users, RefreshCw, X, Check, Target, ToggleLeft, ToggleRight } from 'lucide-react';
 import { useProject } from '@/react-app/hooks/useProject';
 
 interface ReframeToolProps {
   clipId: string | null;
   onClose: () => void;
-  onEnableReframe: (clipId: string, trackId: number | null) => void;
+  onUpdateConfiguration: (clipId: string, configUpdates: { enabled?: boolean; activeFaceTrackId?: number | null; mode?: 'single' | 'group' }) => void;
   activeFaceTrackId: number | null;
   isEnabled: boolean;
+  mode: 'single' | 'group';
 }
 
 export default function ReframeTool({
   clipId,
   onClose,
-  onEnableReframe,
+  onUpdateConfiguration,
   activeFaceTrackId,
   isEnabled,
+  mode,
 }: ReframeToolProps) {
   const { clips, assets, detectFaces, faceTrackingData } = useProject();
   const [detecting, setDetecting] = useState(false);
@@ -46,17 +48,22 @@ export default function ReframeTool({
   const handleToggle = () => {
     if (!clipId) return;
     if (isEnabled) {
-      onEnableReframe(clipId, null);
+      onUpdateConfiguration(clipId, { enabled: false });
     } else {
       // Default to first face if available, or just enable mode waiting for selection
       const firstTrackId = faces.length > 0 ? faces[0].id : null;
-      onEnableReframe(clipId, firstTrackId);
+      onUpdateConfiguration(clipId, { enabled: true, activeFaceTrackId: firstTrackId, mode: 'single' });
     }
   };
 
   const handleSelectFace = (trackId: number) => {
     if (!clipId) return;
-    onEnableReframe(clipId, trackId);
+    onUpdateConfiguration(clipId, { enabled: true, activeFaceTrackId: trackId, mode: 'single' });
+  };
+
+  const handleEnableGroupMode = () => {
+    if (!clipId) return;
+    onUpdateConfiguration(clipId, { enabled: true, mode: 'group' });
   };
 
   if (!selectedClip || !selectedAsset) {
@@ -122,8 +129,36 @@ export default function ReframeTool({
             </div>
           ) : faces.length > 0 ? (
             <div className="grid grid-cols-2 gap-2">
+              <button
+                onClick={handleEnableGroupMode}
+                className={`
+                  relative p-3 rounded-lg border text-left transition-all flex flex-col gap-2 col-span-2
+                  ${isEnabled && mode === 'group'
+                    ? 'bg-brand-500/10 border-brand-500/50'
+                    : 'bg-zinc-800 border-zinc-700 hover:border-zinc-600'
+                  }
+                `}
+              >
+                <div className="flex items-center justify-between">
+                  <div className={`
+                    w-8 h-8 rounded-full flex items-center justify-center
+                    ${isEnabled && mode === 'group' ? 'bg-brand-500 text-black' : 'bg-zinc-700 text-zinc-400'}
+                  `}>
+                    <Users className="w-4 h-4" />
+                  </div>
+                  {isEnabled && mode === 'group' && <Check className="w-4 h-4 text-brand-400" />}
+                </div>
+                <div>
+                  <div className={`text-sm font-medium ${isEnabled && mode === 'group' ? 'text-brand-100' : 'text-zinc-300'}`}>
+                    Group Mode
+                  </div>
+                  <div className="text-xs text-zinc-500">
+                    Average position of all detected faces
+                  </div>
+                </div>
+              </button>
               {faces.map((face, index) => {
-                const isActive = isEnabled && activeFaceTrackId === face.id;
+                const isActive = isEnabled && mode === 'single' && activeFaceTrackId === face.id;
                 const duration = (face.keyframes[face.keyframes.length - 1].t - face.keyframes[0].t).toFixed(1);
 
                 return (
