@@ -1,5 +1,5 @@
 import { useState, useRef, useCallback, useMemo, useEffect } from 'react';
-import { ZoomIn, ZoomOut, Play, Pause, SkipBack, Scissors, Trash2, Type, RectangleHorizontal, RectangleVertical, Link, Unlink } from 'lucide-react';
+import { ZoomIn, ZoomOut, Play, Pause, SkipBack, Scissors, Trash2, Type, RectangleHorizontal, RectangleVertical, Link, Unlink, Film, Music } from 'lucide-react';
 import TimelineClip from './TimelineClip';
 import type { Track, TimelineClip as TimelineClipType, Asset, CaptionData } from '@/react-app/hooks/useProject';
 
@@ -113,7 +113,7 @@ export default function Timeline({
   const timelineWidth = Math.max(totalDuration * pixelsPerSecond, 800);
 
   // Track header width
-  const headerWidth = 48;
+  const headerWidth = 80;
 
   // Time ruler intervals
   const getTimeInterval = useCallback(() => {
@@ -352,17 +352,29 @@ export default function Timeline({
               const trackClipCount = clips.filter(c => c.trackId === track.id).length;
               const isTextTrack = track.type === 'text' && trackClipCount > 0;
 
+              let TrackIcon = Film;
+              let trackColorClass = 'text-cyan-400';
+
+              if (track.type === 'audio') {
+                TrackIcon = Music;
+                trackColorClass = 'text-emerald-400';
+              } else if (track.type === 'text') {
+                TrackIcon = Type;
+                trackColorClass = 'text-purple-400';
+              }
+
               return (
                 <div
                   key={track.id}
-                  className="flex items-center justify-center gap-1 text-xs font-medium text-zinc-400 border-b border-zinc-800/50 px-1"
+                  className="flex items-center justify-start pl-3 gap-2 text-xs font-medium text-zinc-400 border-b border-zinc-800/50"
                   style={{ height: TRACK_HEIGHTS[track.type] }}
                 >
+                  <TrackIcon className={`w-3.5 h-3.5 ${trackColorClass}`} />
                   <span className="truncate">{track.name}</span>
                   {isTextTrack && (
                     <button
                       title={`Delete all ${trackClipCount} captions`}
-                      className="p-0.5 rounded hover:bg-red-500/20 hover:text-red-400 transition-colors flex-shrink-0"
+                      className="p-0.5 rounded hover:bg-red-500/20 hover:text-red-400 transition-colors flex-shrink-0 ml-auto mr-1"
                       onClick={() => {
                         if (confirm(`Delete all ${trackClipCount} captions on ${track.name}?`)) {
                           clips
