@@ -14,7 +14,7 @@ let serverProcess;
 
 function createWindow() {
   mainWindow = new BrowserWindow({
-    title: "xIT",
+    title: "xIT Video Studio",
     width: 1280,
     height: 800,
     webPreferences: {
