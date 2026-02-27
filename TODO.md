@@ -1,4 +1,4 @@
-# HyperEdit - Product Roadmap
+# xIT - Product Roadmap
 
 ## Current State (What's Built)
 - [x] Multi-track timeline (V1 base, V2 overlays)
