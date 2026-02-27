@@ -75,6 +75,11 @@ export default function Home() {
     deleteClip,
     moveClip,
     splitClip,
+    undo,
+    redo,
+    canUndo,
+    canRedo,
+    snapshotClips,
     saveProject,
     loadProject,
     renderProject,
@@ -1623,11 +1628,23 @@ export default function Home() {
         e.preventDefault();
         handleExport();
       }
+
+      // Ctrl+Z for Undo
+      if ((e.ctrlKey || e.metaKey) && e.key === 'z' && !e.shiftKey) {
+        e.preventDefault();
+        if (canUndo) undo();
+      }
+
+      // Ctrl+Y or Ctrl+Shift+Z for Redo
+      if ((e.ctrlKey || e.metaKey) && (e.key === 'y' || (e.key === 'z' && e.shiftKey))) {
+        e.preventDefault();
+        if (canRedo) redo();
+      }
     };
 
     window.addEventListener('keydown', handleGlobalKeyDown);
     return () => window.removeEventListener('keydown', handleGlobalKeyDown);
-  }, [handleExport]);
+  }, [handleExport, undo, redo, canUndo, canRedo]);
 
   // Handle TikTok Export
   const handleTiktokExport = useCallback(async () => {
@@ -1783,8 +1800,10 @@ export default function Home() {
         onRemoveDeadAir={handleRemoveDeadAir}
         onOpenAbout={() => setShowAbout(true)}
         onToggleReframe={() => setShowReframeTool(!showReframeTool)}
-        canUndo={false} // Undo not implemented yet
-        canRedo={false} // Redo not implemented yet
+        canUndo={canUndo}
+        canRedo={canRedo}
+        onUndo={undo}
+        onRedo={redo}
         isProcessing={isProcessing}
         hasProject={!!session || !!legacySession}
         hasClips={clips.length > 0}
@@ -2006,14 +2025,15 @@ export default function Home() {
               onUndo={() => {}}
               onRedo={() => {}}
               onAutoReframe={() => setShowReframeTool(!showReframeTool)}
+              onDragStart={snapshotClips}
             />
           </ResizableVerticalPanel>
         </div>
 
         {/* Right Panel - AI Agents */}
         <ResizablePanel
-          defaultWidth={400}
-          minWidth={350}
+          defaultWidth={450}
+          minWidth={380}
           maxWidth={600}
           side="right"
         >
