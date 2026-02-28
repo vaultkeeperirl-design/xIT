@@ -79,7 +79,6 @@ const TimelineClip = memo(function TimelineClip({
 
     const clickX = e.clientX - rect.left;
     const handleWidth = 8;
-    const clickY = e.clientY;
 
     if (clickX < handleWidth) {
       // Left resize handle
