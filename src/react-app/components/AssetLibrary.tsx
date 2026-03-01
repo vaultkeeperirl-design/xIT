@@ -219,12 +219,12 @@ function AssetCard({ asset, isSelected, onSelect, onDelete, onDragStart }: Asset
         />
       ) : (
         <div className={`w-full h-full bg-gradient-to-br ${colorClass} flex items-center justify-center`}>
-          <Icon className="w-8 h-8 text-white/80" />
+          <Icon className={`w-8 h-8 ${asset.type === 'image' ? 'text-zinc-900/80' : 'text-white/80'}`} />
         </div>
       )}
 
       {/* Type badge */}
-      <div className={`absolute top-1 left-1 px-1.5 py-0.5 rounded bg-gradient-to-r ${colorClass} text-[9px] font-medium uppercase`}>
+      <div className={`absolute top-1 left-1 px-1.5 py-0.5 rounded bg-gradient-to-r ${colorClass} text-[9px] font-medium uppercase ${asset.type === 'image' ? 'text-zinc-900' : 'text-white'}`}>
         {asset.type}
       </div>
 
