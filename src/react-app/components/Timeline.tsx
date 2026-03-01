@@ -521,20 +521,25 @@ export default function Timeline({
               className="sticky top-0 h-6 bg-zinc-900/95 border-b border-zinc-800 z-30 flex-shrink-0"
               onClick={handleTimelineClick}
             >
-              {Array.from({ length: tickCount }).map((_, i) => {
-                const time = i * timeInterval;
-                if (time > totalDuration) return null;
-                return (
-                  <div
-                    key={i}
-                    className="absolute flex flex-col items-start"
-                    style={{ left: `${time * pixelsPerSecond}px` }}
-                  >
-                    <span className="text-[10px] text-zinc-500 pl-1">{formatTime(time)}</span>
-                    <div className="w-px h-2 bg-zinc-700" />
-                  </div>
-                );
-              })}
+              {(() => {
+                // ⚡ Bolt: Use a standard for loop instead of Array.from to prevent unnecessary intermediate array allocations
+                const tickElements = [];
+                for (let i = 0; i < tickCount; i++) {
+                  const time = i * timeInterval;
+                  if (time > totalDuration) break;
+                  tickElements.push(
+                    <div
+                      key={i}
+                      className="absolute flex flex-col items-start"
+                      style={{ left: `${time * pixelsPerSecond}px` }}
+                    >
+                      <span className="text-[10px] text-zinc-500 pl-1">{formatTime(time)}</span>
+                      <div className="w-px h-2 bg-zinc-700" />
+                    </div>
+                  );
+                }
+                return tickElements;
+              })()}
             </div>
 
             {/* Tracks */}
@@ -564,17 +569,22 @@ export default function Timeline({
                     onDrop={(e) => handleDrop(e, track.id)}
                   >
                     {/* Track background grid lines */}
-                    {Array.from({ length: tickCount }).map((_, i) => {
-                      const time = i * timeInterval;
-                      if (time > totalDuration) return null;
-                      return (
-                        <div
-                          key={i}
-                          className="absolute top-0 bottom-0 w-px bg-zinc-800/50"
-                          style={{ left: `${time * pixelsPerSecond}px` }}
-                        />
-                      );
-                    })}
+                    {(() => {
+                      // ⚡ Bolt: Use a standard for loop instead of Array.from to prevent unnecessary intermediate array allocations
+                      const gridElements = [];
+                      for (let i = 0; i < tickCount; i++) {
+                        const time = i * timeInterval;
+                        if (time > totalDuration) break;
+                        gridElements.push(
+                          <div
+                            key={i}
+                            className="absolute top-0 bottom-0 w-px bg-zinc-800/50"
+                            style={{ left: `${time * pixelsPerSecond}px` }}
+                          />
+                        );
+                      }
+                      return gridElements;
+                    })()}
 
                     {/* Empty track placeholder */}
                     {trackClips.length === 0 && !isDragOver && (
