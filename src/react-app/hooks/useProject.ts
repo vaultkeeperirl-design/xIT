@@ -276,6 +276,17 @@ export function useProject() {
 
   // Upload asset
   const uploadAsset = useCallback(async (file: File): Promise<Asset> => {
+    if (file.size === 0) {
+      throw new Error('File is empty');
+    }
+
+    const validExtensions = ['mp4', 'webm', 'mov', 'mkv', 'avi', 'mp3', 'wav', 'aac', 'm4a', 'ogg', 'jpg', 'jpeg', 'png', 'gif', 'webp'];
+    const ext = file.name.split('.').pop()?.toLowerCase() || '';
+
+    if (!validExtensions.includes(ext) && !file.type.startsWith('video/') && !file.type.startsWith('image/') && !file.type.startsWith('audio/')) {
+      throw new Error('Unsupported file type');
+    }
+
     setLoading(true);
     const fileSizeMB = (file.size / (1024 * 1024)).toFixed(1);
     setStatus(`Uploading ${file.name} (${fileSizeMB} MB)...`);

@@ -27,3 +27,13 @@ test('resizeClip should prevent duration from being <= 0', () => {
   expect(updatedClip).toBeDefined();
   expect(updatedClip?.duration).toBeGreaterThan(0);
 });
+
+test('uploadAsset should reject invalid files (empty or unsupported type)', async () => {
+  const { result } = renderHook(() => useProject());
+
+  const emptyFile = new File([], 'empty.mp4', { type: 'video/mp4' });
+  await expect(result.current.uploadAsset(emptyFile)).rejects.toThrow('File is empty');
+
+  const textFile = new File(['hello'], 'test.txt', { type: 'text/plain' });
+  await expect(result.current.uploadAsset(textFile)).rejects.toThrow('Unsupported file type');
+});
