@@ -280,6 +280,11 @@ export function useProject() {
       throw new Error('File is empty');
     }
 
+    // 500MB maximum file size
+    if (file.size > 500 * 1024 * 1024) {
+      throw new Error('File exceeds maximum size of 500MB');
+    }
+
     const validExtensions = ['mp4', 'webm', 'mov', 'mkv', 'avi', 'mp3', 'wav', 'aac', 'm4a', 'ogg', 'jpg', 'jpeg', 'png', 'gif', 'webp'];
     const ext = file.name.split('.').pop()?.toLowerCase() || '';
 

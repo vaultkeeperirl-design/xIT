@@ -37,3 +37,12 @@ test('uploadAsset should reject invalid files (empty or unsupported type)', asyn
   const textFile = new File(['hello'], 'test.txt', { type: 'text/plain' });
   await expect(result.current.uploadAsset(textFile)).rejects.toThrow('Unsupported file type');
 });
+
+test('uploadAsset should reject files larger than 500MB', async () => {
+  const { result } = renderHook(() => useProject());
+
+  const largeFile = new File([''], 'large.mp4', { type: 'video/mp4' });
+  Object.defineProperty(largeFile, 'size', { value: 501 * 1024 * 1024 });
+
+  await expect(result.current.uploadAsset(largeFile)).rejects.toThrow('File exceeds maximum size of 500MB');
+});
