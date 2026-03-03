@@ -71,9 +71,32 @@ export default function AssetLibrary({
     }
   }, [onUpload]);
 
+  const dragCounter = useRef(0);
+  const [isDragActive, setIsDragActive] = useState(false);
+
+  const handleDragEnter = useCallback((e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    dragCounter.current += 1;
+    if (e.dataTransfer.items && e.dataTransfer.items.length > 0) {
+      setIsDragActive(true);
+    }
+  }, []);
+
+  const handleDragLeave = useCallback((e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    dragCounter.current -= 1;
+    if (dragCounter.current === 0) {
+      setIsDragActive(false);
+    }
+  }, []);
+
   const handleDrop = useCallback((e: React.DragEvent) => {
     e.preventDefault();
     e.stopPropagation();
+    dragCounter.current = 0;
+    setIsDragActive(false);
 
     const files = e.dataTransfer.files;
     if (files && files.length > 0) {
@@ -124,10 +147,20 @@ export default function AssetLibrary({
 
       {/* Asset grid */}
       <div
-        className="flex-1 overflow-auto p-2"
+        className={`flex-1 overflow-auto p-2 relative transition-colors ${
+          isDragActive ? 'bg-brand-500/10' : ''
+        }`}
         onDrop={handleDrop}
+        onDragEnter={handleDragEnter}
         onDragOver={handleDragOver}
+        onDragLeave={handleDragLeave}
       >
+        {isDragActive && (
+          <div className="absolute inset-0 border-2 border-brand-500 border-dashed m-2 rounded-lg bg-zinc-900/50 flex flex-col items-center justify-center z-50 pointer-events-none backdrop-blur-sm">
+            <Upload className="w-10 h-10 text-brand-400 mb-2 animate-bounce" />
+            <p className="text-brand-300 font-medium text-sm">Drop files to upload</p>
+          </div>
+        )}
         {assets.length === 0 ? (
           <div
             onClick={handleFileSelect}
