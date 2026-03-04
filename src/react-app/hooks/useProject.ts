@@ -590,8 +590,19 @@ export function useProject() {
       secondClip,
     ]);
 
+    // Copy caption data if it exists
+    if (captionData[clipId]) {
+      setCaptionData(prev => ({
+        ...prev,
+        [secondClip.id]: {
+          words: [...captionData[clipId].words],
+          style: { ...captionData[clipId].style }
+        }
+      }));
+    }
+
     return secondClip.id;
-  }, [clips, snapshotClips, setClipsInternal]);
+  }, [clips, snapshotClips, setClipsInternal, captionData]);
 
   // Create a new timeline tab for editing a clip/animation in isolation
   const createTimelineTab = useCallback((name: string, assetId: string, initialClips?: TimelineClip[]): string => {
