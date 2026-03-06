@@ -173,10 +173,10 @@ const TimelineClip = memo(function TimelineClip({
         onMove(clip.id, newStart, targetTrackId);
       } else if (isResizingLeft) {
         // Resize from left - changes inPoint and start
-        let newInPoint = Math.max(0, initialInPoint + deltaTime);
+        const newInPoint = Math.max(0, initialInPoint + deltaTime);
         const maxInPoint = clip.outPoint - 0.1; // Minimum 0.1s duration
         let clampedInPoint = Math.min(newInPoint, maxInPoint);
-        let inPointDelta = clampedInPoint - initialInPoint;
+        const inPointDelta = clampedInPoint - initialInPoint;
         let newStart = initialStart + inPointDelta;
 
         // Snapping for resize left
@@ -196,14 +196,14 @@ const TimelineClip = memo(function TimelineClip({
         onResize(clip.id, clampedInPoint, clip.outPoint, Math.max(0, newStart));
       } else if (isResizingRight) {
         // Resize from right - changes outPoint
-        let newOutPoint = initialOutPoint + deltaTime;
+        const newOutPoint = initialOutPoint + deltaTime;
         const minOutPoint = clip.inPoint + 0.1; // Minimum 0.1s duration
         const maxOutPoint = asset?.duration ?? Infinity;
         let clampedOutPoint = Math.min(Math.max(newOutPoint, minOutPoint), maxOutPoint);
 
         // Output duration = outPoint - inPoint
         // New end time = clip.start + (newOutPoint - clip.inPoint)
-        let newEnd = clip.start + (clampedOutPoint - clip.inPoint);
+        const newEnd = clip.start + (clampedOutPoint - clip.inPoint);
 
         // Snapping for resize right
         const snapThreshold = 10 / pixelsPerSecond;
