@@ -348,7 +348,14 @@ export default function Home() {
   // Get duration based on active tab's clips
   const duration = useMemo(() => {
     if (activeClips.length === 0) return 0;
-    return Math.max(...activeClips.map(c => c.start + c.duration));
+    let max = 0;
+    for (let i = 0; i < activeClips.length; i++) {
+      const end = activeClips[i].start + activeClips[i].duration;
+      if (end > max) {
+        max = end;
+      }
+    }
+    return max;
   }, [activeClips]);
 
   // Timeline playback effect
