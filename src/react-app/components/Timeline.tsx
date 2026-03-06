@@ -281,10 +281,21 @@ export default function Timeline({
     }
   }, [pixelsPerSecond, onDropAsset]);
 
+  // ⚡ Bolt: Cache assets in a Map to optimize asset retrieval from O(N) to O(1)
+  // This reduces the complexity of rendering clips from O(C * A) to O(C + A)
+  const assetsById = useMemo(() => {
+    const map = new Map<string, Asset>();
+    for (let i = 0; i < assets.length; i++) {
+      const asset = assets[i];
+      map.set(asset.id, asset);
+    }
+    return map;
+  }, [assets]);
+
   // Get asset for a clip
   const getAssetForClip = useCallback((clip: TimelineClipType) =>
-    assets.find(a => a.id === clip.assetId),
-    [assets]
+    assetsById.get(clip.assetId),
+    [assetsById]
   );
 
   return (
