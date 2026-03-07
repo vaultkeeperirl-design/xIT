@@ -117,6 +117,17 @@ export default function Home() {
     return activeTab?.clips || [];
   }, [activeTabId, clips, timelineTabs]);
 
+  // ⚡ Bolt: Cache assets in a Map to optimize asset retrieval from O(N) to O(1) during playback rendering
+  // This reduces the complexity of generating preview layers from O(C * A) to O(C + A)
+  const assetsById = useMemo(() => {
+    const map = new Map<string, Asset>();
+    for (let i = 0; i < assets.length; i++) {
+      const asset = assets[i];
+      map.set(asset.id, asset);
+    }
+    return map;
+  }, [assets]);
+
   // Use the legacy session hook for AI editing (single video operations)
   const {
     session: legacySession,
@@ -229,7 +240,7 @@ export default function Home() {
   const getPreviewLayers = useCallback(() => {
     // If a specific asset is selected for preview (from library), show only that
     if (previewAssetId) {
-      const asset = assets.find(a => a.id === previewAssetId);
+      const asset = assetsById.get(previewAssetId);
       // Use asset.streamUrl which has cache-busting timestamp
       const url = asset?.streamUrl || (asset ? getAssetStreamUrl(previewAssetId) : null);
       if (asset && url) {
@@ -269,7 +280,7 @@ export default function Home() {
       );
 
       for (const clip of clipsOnTrack) {
-        const asset = assets.find(a => a.id === clip.assetId);
+        const asset = assetsById.get(clip.assetId);
         // Use asset.streamUrl which has cache-busting timestamp from refreshAssets
         const url = asset?.streamUrl || (asset ? getAssetStreamUrl(asset.id) : null);
         if (asset && url) {
@@ -299,7 +310,7 @@ export default function Home() {
       );
 
       for (const clip of clipsOnTrack) {
-        const asset = assets.find(a => a.id === clip.assetId);
+        const asset = assetsById.get(clip.assetId);
         const url = asset?.streamUrl || (asset ? getAssetStreamUrl(asset.id) : null);
         if (asset && url && asset.type === 'audio') {
           const clipTime = (currentTime - clip.start) + (clip.inPoint || 0);
@@ -340,7 +351,7 @@ export default function Home() {
     }
 
     return layers;
-  }, [previewAssetId, assets, activeClips, currentTime, getAssetStreamUrl, getCaptionData]);
+  }, [previewAssetId, assetsById, activeClips, currentTime, getAssetStreamUrl, getCaptionData]);
 
   const previewLayers = getPreviewLayers();
   const hasPreviewContent = previewLayers.length > 0;
