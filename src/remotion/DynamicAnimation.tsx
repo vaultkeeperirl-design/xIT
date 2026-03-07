@@ -750,7 +750,20 @@ const BarChart: React.FC<{
 }> = ({ data, maxValue, delay = 0 }) => {
   const frame = useCurrentFrame();
   const { fps } = useVideoConfig();
-  const actualMax = maxValue || Math.max(...data.map(d => d.value));
+
+  let actualMax = maxValue;
+  if (actualMax === undefined) {
+    actualMax = 1;
+    if (data && data.length > 0) {
+      actualMax = data[0].value;
+      for (let i = 1; i < data.length; i++) {
+        if (data[i].value > actualMax) {
+          actualMax = data[i].value;
+        }
+      }
+    }
+  }
+
   const colors = ['#f97316', '#3b82f6', '#22c55e', '#8b5cf6', '#ec4899', '#eab308'];
 
   return (
