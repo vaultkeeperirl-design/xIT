@@ -1,3 +1,4 @@
+import React from "react";
 import { AbsoluteFill, useCurrentFrame, useVideoConfig, interpolate, spring } from 'remotion';
 
 export interface DataChartProps {
@@ -31,7 +32,15 @@ export const DataChart: React.FC<DataChartProps> = ({
   const { fps, durationInFrames } = useVideoConfig();
 
   const opacity = interpolate(frame, [0, 20], [0, 1], { extrapolateRight: 'clamp' });
-  const maxValue = Math.max(...data.map(d => d.value));
+  let maxValue = 1; // Default to 1 to avoid division by zero
+  if (data && data.length > 0) {
+    maxValue = data[0].value;
+    for (let i = 1; i < data.length; i++) {
+      if (data[i].value > maxValue) {
+        maxValue = data[i].value;
+      }
+    }
+  }
 
   // Bar chart
   if (type === 'bar') {
