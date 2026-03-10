@@ -159,24 +159,28 @@ export const DataChart: React.FC<DataChartProps> = ({
             ))}
 
             {/* Line path */}
-            <path
-              d={points.map((p, i) => `${i === 0 ? 'M' : 'L'} ${p.x} ${p.y}`).join(' ')}
-              fill="none"
-              stroke={color}
-              strokeWidth={3}
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeDasharray={1000}
-              strokeDashoffset={1000 - lineProgress * 1000}
-              style={{ filter: style === 'neon' ? `drop-shadow(0 0 10px ${color})` : 'none' }}
-            />
+            {points.length > 0 && (
+              <path
+                d={points.map((p, i) => `${i === 0 ? 'M' : 'L'} ${p.x} ${p.y}`).join(' ')}
+                fill="none"
+                stroke={color}
+                strokeWidth={3}
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeDasharray={1000}
+                strokeDashoffset={1000 - lineProgress * 1000}
+                style={{ filter: style === 'neon' ? `drop-shadow(0 0 10px ${color})` : 'none' }}
+              />
+            )}
 
             {/* Area fill */}
-            <path
-              d={`${points.map((p, i) => `${i === 0 ? 'M' : 'L'} ${p.x} ${p.y}`).join(' ')} L ${points[points.length - 1].x} ${chartHeight - padding} L ${points[0].x} ${chartHeight - padding} Z`}
-              fill={`${color}20`}
-              opacity={lineProgress}
-            />
+            {points.length > 0 && (
+              <path
+                d={`${points.map((p, i) => `${i === 0 ? 'M' : 'L'} ${p.x} ${p.y}`).join(' ')} L ${points[points.length - 1].x} ${chartHeight - padding} L ${points[0].x} ${chartHeight - padding} Z`}
+                fill={`${color}20`}
+                opacity={lineProgress}
+              />
+            )}
 
             {/* Points */}
             {points.map((p, i) => {

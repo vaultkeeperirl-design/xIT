@@ -26,4 +26,14 @@ describe('DataChart', () => {
         render(<DataChart data={largeData} type="bar" />);
     }).not.toThrow();
   });
+
+  it('should handle empty data for line chart', () => {
+    const { container } = render(<DataChart data={[]} type="line" />);
+    expect(container).toBeTruthy();
+  });
+
+  it('should handle empty data for donut chart', () => {
+    const { container } = render(<DataChart data={[]} type="donut" />);
+    expect(container).toBeTruthy();
+  });
 });
