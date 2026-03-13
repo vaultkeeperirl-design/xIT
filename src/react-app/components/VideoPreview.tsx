@@ -426,18 +426,19 @@ const VideoPreview = forwardRef<VideoPreviewHandle, VideoPreviewProps>(({
     if (isPlaying) return; // Don't interfere during playback
 
     // Find overlay video and audio layers and sync their time
-    const overlayMediaLayers = layers.filter(
-      l => (l.type === 'video' && l.trackId !== 'V1') || l.type === 'audio'
-    );
-
-    overlayMediaLayers.forEach((layer) => {
-      const mediaEl = overlayVideoRefs.current.get(layer.id);
-      if (mediaEl && layer.clipTime !== undefined) {
-        if (Math.abs(mediaEl.currentTime - layer.clipTime) > 0.1) {
-          mediaEl.currentTime = layer.clipTime;
+    // ⚡ Bolt: Use a standard for loop instead of filter and forEach to prevent
+    // unnecessary intermediate array allocations, reducing garbage collection overhead.
+    for (let i = 0; i < layers.length; i++) {
+      const layer = layers[i];
+      if ((layer.type === 'video' && layer.trackId !== 'V1') || layer.type === 'audio') {
+        const mediaEl = overlayVideoRefs.current.get(layer.id);
+        if (mediaEl && layer.clipTime !== undefined) {
+          if (Math.abs(mediaEl.currentTime - layer.clipTime) > 0.1) {
+            mediaEl.currentTime = layer.clipTime;
+          }
         }
       }
-    });
+    }
   }, [layers, isPlaying]);
 
   // Seek on load
