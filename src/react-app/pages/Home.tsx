@@ -237,7 +237,30 @@ export default function Home() {
     };
   }, [aspectRatio, activeClips, currentTime, reframeConfig, assets, faceTrackingData]);
 
-  // Get all clips at the current playhead position as layers
+  /**
+   * Translates abstract timeline state into renderable visual and audio layers for the current frame.
+   *
+   * **Why this is critical:**
+   * This is the bridge between the application's data model (`clips`, `tracks`) and the visual
+   * rendering engine (`Player` / `<RemotionRoot>`). It determines exactly what should be visible
+   * or audible at the exact microsecond of `currentTime`.
+   *
+   * **Why performance is paramount here:**
+   * This function executes on *every single frame* during playback or when a user drags the playhead
+   * (up to 60fps). If it is slow, the video preview stutters and the UI feels unresponsive.
+   *
+   * **Why these specific patterns are used:**
+   * 1. **Single-Pass Loops (`for` instead of array methods):** Array methods like `.filter()`,
+   *    `.map()`, and `.flatMap()` create intermediate arrays that immediately become garbage. Doing this
+   *    at 60fps causes severe Garbage Collection (GC) pressure, leading to dropped frames. By using
+   *    pre-allocated arrays (`v1Layers`, etc.) and a single `for` loop to route items, we achieve
+   *    $O(N)$ performance with minimal memory allocation overhead.
+   * 2. **Asset Lookup Maps (`assetsById`):** Instead of using `assets.find()` ($O(M)$), we use a
+   *    pre-computed `Map` (`assetsById`) to achieve $O(1)$ asset lookups. Inside a loop running at
+   *    60fps, changing $O(N \\times M)$ to $O(N + M)$ is the difference between smooth playback and freezing.
+   *
+   * @returns {Array} A categorized list of layers (V1, V2, V3, audio, text) active at the current playhead.
+   */
   const getPreviewLayers = useCallback(() => {
     // If a specific asset is selected for preview (from library), show only that
     if (previewAssetId) {
