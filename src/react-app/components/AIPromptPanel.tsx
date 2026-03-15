@@ -913,29 +913,37 @@ const AIPromptPanel = forwardRef<AIPromptPanelHandle, AIPromptPanelProps>(({
   }
 
   /**
-   * Determines the most appropriate video editing workflow based on user intent and current application context.
+   * Smart Assistant Routing Heuristics
    *
-   * **Why this exists:**
-   * Natural language prompts are inherently ambiguous. A prompt like "make it bigger" could mean
-   * scaling a video clip or enlarging text in a Remotion animation. This function acts as a smart router,
-   * combining regex-based intent parsing with state-aware context to disambiguate the request.
+   * Determines the target workflow (e.g., animation, ffmpeg edit, chapter cuts) based
+   * on the user's natural language prompt and the current application context.
    *
-   * **How routing works:**
-   * 1. **Context-Aware Decisions (Highest Priority):** Evaluates *where* the user is and *what* is selected.
-   *    If the user is on an animation edit tab (`isOnEditTab`) or has an AI animation selected on the main timeline
-   *    (`selectedClipIsAiAnimation`), general verbs like "edit", "change", or "zoom" are assumed to target
-   *    the animation (`edit-animation`), rather than defaulting to creating a new one or applying a generic FFmpeg filter.
-   * 2. **Intent-Based Decisions:** If no specific context overrides apply, the function falls back to analyzing
-   *    the prompt for specific keywords matching distinct workflows (e.g., "dead air", "caption", "extract audio").
+   * @param ctx - The current assistant context, including active tab state and selected assets.
+   * @returns The resolved workflow type to handle the prompt.
    *
-   * @param {AssistantContext} ctx - The state context when the prompt was submitted. Includes the raw prompt text, UI state (like active tabs), and metadata about selected clips.
-   * @returns {WorkflowType} The identified workflow type to execute.
+   * @remarks
+   * The routing engine prioritizes **Context** over **Intent**.
+   * Why? Words like "edit" or "change" are highly ambiguous. If a user says "edit this",
+   * we need to know *what* they are looking at. If they are on the "Animation" edit tab
+   * (`ctx.isOnEditTab && ctx.editTabHasAnimation`), "edit" means modifying Remotion properties.
+   * If they are on the main timeline, "edit" might mean an FFmpeg cut or auto-edit.
+   * By evaluating context first, we drastically reduce false positives in intent parsing.
+   *
+   * **The decision-making hierarchy:**
+   * 1. **Context-Aware Decisions (Highest Priority):** First checks if the user is in a specific state
+   *    (e.g., viewing an animation edit tab, or has an AI-generated clip selected). If so, it interprets
+   *    ambiguous verbs within that specific context (routing to `edit-animation`).
+   * 2. **Intent-Based Decisions:** If no context overrides apply, it falls back to analyzing the prompt
+   *    for specific keywords matching distinct workflows (e.g., "dead air", "caption").
    */
   const determineWorkflow = (ctx: AssistantContext): WorkflowType => {
     const lower = ctx.prompt.toLowerCase();
 
     // ============================================
     // CONTEXT-AWARE DECISIONS
+    //
+    // Evaluated first to catch ambiguous verbs (edit, change, update)
+    // that have drastically different meanings depending on what the user is focused on.
     // ============================================
 
     // If user has selected an AI animation clip on the main timeline and wants to edit it
@@ -1070,6 +1078,7 @@ const AIPromptPanel = forwardRef<AIPromptPanelHandle, AIPromptPanelProps>(({
     }
 
     // Create new animation (explicit creation requests)
+    // Needs explicit verbs because "animation" alone might mean editing an existing one
     if ((lower.includes('create') || lower.includes('make') || lower.includes('generate') ||
          lower.includes('add') || lower.includes('build') || lower.includes('design')) &&
         (lower.includes('animation') || lower.includes('animated') || lower.includes('motion') ||
@@ -1115,6 +1124,7 @@ const AIPromptPanel = forwardRef<AIPromptPanelHandle, AIPromptPanelProps>(({
     }
 
     // FFmpeg-style video edits (trim, cut, speed, etc.)
+    // These are structural modifications to the source media.
     if (lower.includes('trim') || lower.includes('cut') || lower.includes('speed') ||
         lower.includes('slow') || lower.includes('fast') || lower.includes('reverse') ||
         lower.includes('crop') || lower.includes('rotate') || lower.includes('flip') ||
@@ -1122,8 +1132,10 @@ const AIPromptPanel = forwardRef<AIPromptPanelHandle, AIPromptPanelProps>(({
       return 'ffmpeg-edit';
     }
 
-    // Default: for creative/visual requests, prefer animation over FFmpeg
-    // Only use ffmpeg-edit when the user clearly wants video manipulation
+    // Default Fallback
+    // Why create-animation? Creative/visual generation is the primary value prop of the AI assistant.
+    // If we can't figure out exactly what they want, assuming they want to generate something visual
+    // is historically more correct than assuming they want a low-level FFmpeg trim operation.
     return 'create-animation';
   };
 
