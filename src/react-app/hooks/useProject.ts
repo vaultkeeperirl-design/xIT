@@ -295,6 +295,10 @@ export function useProject() {
    * @returns A promise that resolves to the newly created Asset metadata.
    */
   const uploadAsset = useCallback(async (file: File): Promise<Asset> => {
+    if (!file) {
+      throw new Error('File must be provided');
+    }
+
     if (file.size === 0) {
       throw new Error('File is empty');
     }
