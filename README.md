@@ -9,6 +9,7 @@ xIT is an AI-powered video editing application built with Electron, React, and R
 ## Features
 
 -   **AI Video Editing:** Use natural language prompts to edit videos.
+-   **Smart Assistant Routing:** Context-aware prompt parsing ensures ambiguous commands (e.g., "edit this") are accurately routed based on the user's active timeline or selected assets.
 -   **Remotion Integration:** Render high-quality motion graphics and animations.
 -   **Local Processing:** Uses a local FFmpeg server for fast asset management and rendering.
 -   **AI Transcription:** Automatic captions and transcript-based editing.
