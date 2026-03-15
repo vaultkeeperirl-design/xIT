@@ -629,7 +629,7 @@ export default function AIVideoLabPanel({
         )}
 
         {/* Unified Input Container */}
-        <div className="bg-zinc-800 rounded-xl border border-zinc-700/50 focus-within:ring-2 focus-within:ring-zinc-400/50 transition-all">
+        <div className="bg-zinc-800 rounded-xl border border-zinc-700/50 focus-within:ring-2 focus-within:ring-brand-500/50 transition-all">
           {/* Textarea */}
           <textarea
             value={prompt}
