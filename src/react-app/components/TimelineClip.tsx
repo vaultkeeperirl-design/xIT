@@ -129,7 +129,10 @@ const TimelineClip = memo(function TimelineClip({
         let bestSnapStart = newStart;
         let minDiff = snapThreshold;
 
-        for (const pt of snapPoints) {
+        // ⚡ Bolt: Use standard indexed loop instead of for...of to prevent
+        // allocating iterator objects in this high-frequency mousemove handler
+        for (let i = 0; i < snapPoints.length; i++) {
+          const pt = snapPoints[i];
           if (Math.abs(newStart - pt) < minDiff) {
             minDiff = Math.abs(newStart - pt);
             bestSnapStart = pt;
@@ -147,8 +150,8 @@ const TimelineClip = memo(function TimelineClip({
         let targetTrackId: string | undefined;
         // The track element should have a data-track-id attribute (we'll add it in Timeline.tsx)
         const elements = document.elementsFromPoint(e.clientX, e.clientY);
-        for (const el of elements) {
-          const trackId = el.getAttribute('data-track-id');
+        for (let i = 0; i < elements.length; i++) {
+          const trackId = elements[i].getAttribute('data-track-id');
           if (trackId) {
             targetTrackId = trackId;
             break;
@@ -183,7 +186,8 @@ const TimelineClip = memo(function TimelineClip({
 
         // Snapping for resize left
         const snapThreshold = 10 / pixelsPerSecond;
-        for (const pt of snapPoints) {
+        for (let i = 0; i < snapPoints.length; i++) {
+          const pt = snapPoints[i];
           if (Math.abs(newStart - pt) < snapThreshold) {
             const snappedDelta = pt - initialStart;
             const snappedInPoint = initialInPoint + snappedDelta;
@@ -208,7 +212,8 @@ const TimelineClip = memo(function TimelineClip({
 
         // Snapping for resize right
         const snapThreshold = 10 / pixelsPerSecond;
-        for (const pt of snapPoints) {
+        for (let i = 0; i < snapPoints.length; i++) {
+          const pt = snapPoints[i];
           if (Math.abs(newEnd - pt) < snapThreshold) {
              const snappedDuration = pt - clip.start;
              const snappedOutPoint = clip.inPoint + snappedDuration;
