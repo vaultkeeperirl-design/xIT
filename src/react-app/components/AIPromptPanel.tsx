@@ -3014,7 +3014,7 @@ const AIPromptPanel = forwardRef<AIPromptPanelHandle, AIPromptPanelProps>(({
               className="w-8 h-8 bg-gradient-to-r from-brand-500 to-brand-400 disabled:from-zinc-700 disabled:to-zinc-700 rounded-lg flex items-center justify-center transition-all hover:shadow-lg hover:shadow-brand-500/50 disabled:shadow-none text-zinc-900 disabled:text-zinc-400"
             >
               {isProcessing ? (
-                <div className="w-4 h-4 border-2 border-white/20 border-t-white rounded-full animate-spin" />
+                <div className="w-4 h-4 border-2 border-zinc-900/20 border-t-zinc-900 rounded-full animate-spin" />
               ) : (
                 <Send className="w-4 h-4" />
               )}
