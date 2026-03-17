@@ -223,7 +223,8 @@ export default function Home() {
     const config = reframeConfig[v1Clip.id];
     if (!config?.enabled || (!config.activeFaceTrackId && config.mode === 'single')) return undefined;
 
-    const asset = assets.find(a => a.id === v1Clip.assetId);
+    // ⚡ Bolt: Replace O(N) array .find() with O(1) Map lookup
+    const asset = assetsById.get(v1Clip.assetId);
     if (!asset) return undefined;
 
     const tracks = faceTrackingData[asset.id] || [];
@@ -235,7 +236,7 @@ export default function Home() {
       faceTrack,
       allFaceTracks: tracks
     };
-  }, [aspectRatio, activeClips, currentTime, reframeConfig, assets, faceTrackingData]);
+  }, [aspectRatio, activeClips, currentTime, reframeConfig, assetsById, faceTrackingData]);
 
   /**
    * Translates abstract timeline state into renderable visual and audio layers for the current frame.
