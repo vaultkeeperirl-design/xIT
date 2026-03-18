@@ -315,7 +315,7 @@ export function useProject() {
     const validExtensions = ['mp4', 'webm', 'mov', 'mkv', 'avi', 'mp3', 'wav', 'aac', 'm4a', 'ogg', 'jpg', 'jpeg', 'png', 'gif', 'webp'];
     const ext = file.name.split('.').pop()?.toLowerCase() || '';
 
-    if (!validExtensions.includes(ext) && !file.type.startsWith('video/') && !file.type.startsWith('image/') && !file.type.startsWith('audio/')) {
+    if (!validExtensions.includes(ext) && !(file.type || '').startsWith('video/') && !(file.type || '').startsWith('image/') && !(file.type || '').startsWith('audio/')) {
       throw new Error('Unsupported file type');
     }
 
