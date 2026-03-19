@@ -487,7 +487,20 @@ function calculateKeepSegments(silencePeriods, totalDuration, minSegmentDuration
   return keepSegments;
 }
 
-// Remove dead air from video
+/**
+ * Removes dead air (silence) from a video using a single-pass FFmpeg filter complex.
+ *
+ * **Why a single-pass filter complex?**
+ * Instead of splitting the video into multiple temporary files (which causes massive disk I/O bottlenecks)
+ * and concatenating them back together (which frequently leads to audio/video desynchronization),
+ * this approach constructs one massive `filter_complex` command.
+ * It maps out `trim` and `atrim` operations for every "keep" segment, resets their presentation
+ * timestamps (`setpts=PTS-STARTPTS`), and pipes them directly into a `concat` filter entirely in memory.
+ * This guarantees perfect A/V sync and significantly faster processing.
+ *
+ * @param {import('http').IncomingMessage} req
+ * @param {import('http').ServerResponse} res
+ */
 async function handleRemoveDeadAir(req, res) {
   const jobId = randomUUID();
   const inputPath = join(TEMP_DIR, `${jobId}-input.mp4`);
@@ -566,13 +579,19 @@ async function handleRemoveDeadAir(req, res) {
 
     for (let i = 0; i < keepSegments.length; i++) {
       const seg = keepSegments[i];
+      // Extract the video portion and reset its internal clock so it starts at 0
       filterParts.push(`[0:v]trim=start=${seg.start}:end=${seg.end},setpts=PTS-STARTPTS[v${i}]`);
+      // Extract the audio portion and reset its internal clock so it starts at 0
       filterParts.push(`[0:a]atrim=start=${seg.start}:end=${seg.end},asetpts=PTS-STARTPTS[a${i}]`);
+
+      // Track the stream labels for the final concat operation
       videoStreams.push(`[v${i}]`);
       audioStreams.push(`[a${i}]`);
     }
 
+    // Merge all individual video streams into one continuous stream [outv]
     filterParts.push(`${videoStreams.join('')}concat=n=${keepSegments.length}:v=1:a=0[outv]`);
+    // Merge all individual audio streams into one continuous stream [outa]
     filterParts.push(`${audioStreams.join('')}concat=n=${keepSegments.length}:v=0:a=1[outa]`);
 
     const filterComplex = filterParts.join(';');
