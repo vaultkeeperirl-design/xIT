@@ -616,13 +616,15 @@ export default function Home() {
 
   // Handle cutting clips at the playhead position
   const handleCutAtPlayhead = useCallback((trackId?: string | null) => {
-    // Find all clips that are under the playhead
-    let clipsAtPlayhead = clips.filter(clip =>
-      currentTime > clip.start && currentTime < clip.start + clip.duration
-    );
-
-    if (trackId) {
-      clipsAtPlayhead = clipsAtPlayhead.filter(clip => clip.trackId === trackId);
+    // ⚡ Bolt: Single-pass loop to find clips under playhead, avoiding multiple filter allocations
+    const clipsAtPlayhead = [];
+    for (let i = 0; i < clips.length; i++) {
+      const clip = clips[i];
+      if (currentTime > clip.start && currentTime < clip.start + clip.duration) {
+        if (!trackId || clip.trackId === trackId) {
+          clipsAtPlayhead.push(clip);
+        }
+      }
     }
 
     if (clipsAtPlayhead.length === 0) {
