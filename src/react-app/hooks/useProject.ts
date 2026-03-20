@@ -576,9 +576,10 @@ export function useProject() {
     // Snapshot should be called by onDragStart in the UI.
     setClipsInternal((prev: TimelineClip[]) => prev.map((c: TimelineClip) => {
       if (c.id !== clipId) return c;
+      const safeNewStart = Number.isFinite(newStart) ? newStart : c.start;
       return {
         ...c,
-        start: Math.max(0, newStart),
+        start: Math.max(0, safeNewStart),
         trackId: newTrackId ?? c.trackId,
       };
     }));
@@ -590,18 +591,19 @@ export function useProject() {
     setClipsInternal((prev: TimelineClip[]) => prev.map(c => {
       if (c.id !== clipId) return c;
 
-      let safeOutPoint = newOutPoint;
+      const safeInPoint = Number.isFinite(newInPoint) ? Math.max(0, newInPoint) : c.inPoint;
+      let safeOutPoint = Number.isFinite(newOutPoint) ? Math.max(0, newOutPoint) : c.outPoint;
       const minDuration = 0.1;
 
-      if (safeOutPoint - newInPoint < minDuration) {
-        safeOutPoint = newInPoint + minDuration;
+      if (safeOutPoint - safeInPoint < minDuration) {
+        safeOutPoint = safeInPoint + minDuration;
       }
 
-      const newDuration = safeOutPoint - newInPoint;
+      const newDuration = safeOutPoint - safeInPoint;
 
       return {
         ...c,
-        inPoint: newInPoint,
+        inPoint: safeInPoint,
         outPoint: safeOutPoint,
         duration: newDuration,
       };
