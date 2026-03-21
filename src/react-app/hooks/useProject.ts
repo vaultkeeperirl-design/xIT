@@ -490,27 +490,34 @@ export function useProject() {
   ): TimelineClip => {
     const asset = assets.find(a => a.id === assetId);
 
+    // Ensure numeric inputs are finite
+    const safeStart = Number.isFinite(start) ? Math.max(0, start) : 0;
+    const safeInPoint = (inPoint !== undefined && Number.isFinite(inPoint)) ? Math.max(0, inPoint) : 0;
+
     // For images, use provided duration or default to 5 seconds
     // For video/audio, use asset duration
     // If asset not found (race condition with refreshAssets), use provided duration or default
     let clipDuration: number;
-    if (duration !== undefined) {
-      clipDuration = duration;
-    } else if (asset) {
+    if (duration !== undefined && Number.isFinite(duration)) {
+      clipDuration = Math.max(0, duration);
+    } else if (asset && (asset.type === 'image' || Number.isFinite(asset.duration))) {
       clipDuration = asset.type === 'image' ? 5 : asset.duration;
     } else {
       clipDuration = 5; // Default fallback
-      console.warn(`Asset ${assetId} not found in state, using default duration`);
     }
+
+    const safeOutPoint = (outPoint !== undefined && Number.isFinite(outPoint))
+      ? Math.max(0, outPoint)
+      : safeInPoint + clipDuration;
 
     const clip: TimelineClip = {
       id: crypto.randomUUID(),
       assetId,
       trackId,
-      start,
+      start: safeStart,
       duration: clipDuration,
-      inPoint: inPoint ?? 0,
-      outPoint: outPoint ?? clipDuration,
+      inPoint: safeInPoint,
+      outPoint: safeOutPoint,
     };
 
     snapshotClips(); // Snapshot before adding
@@ -574,6 +581,10 @@ export function useProject() {
   const moveClip = useCallback((clipId: string, newStart: number, newTrackId?: string): void => {
     // This is a continuous action, so NO snapshot here.
     // Snapshot should be called by onDragStart in the UI.
+    if (!Number.isFinite(newStart)) {
+      return;
+    }
+
     setClipsInternal((prev: TimelineClip[]) => prev.map((c: TimelineClip) => {
       if (c.id !== clipId) return c;
       return {
@@ -587,21 +598,29 @@ export function useProject() {
   // Resize clip (change in/out points or duration)
   const resizeClip = useCallback((clipId: string, newInPoint: number, newOutPoint: number): void => {
     // Continuous action, no snapshot.
+
+    // Ensure inputs are finite numbers to avoid corrupting React state
+    if (!Number.isFinite(newInPoint) || !Number.isFinite(newOutPoint)) {
+      return;
+    }
+
+    const safeInPoint = Math.max(0, newInPoint);
+
     setClipsInternal((prev: TimelineClip[]) => prev.map(c => {
       if (c.id !== clipId) return c;
 
-      let safeOutPoint = newOutPoint;
+      let safeOutPoint = Math.max(0, newOutPoint);
       const minDuration = 0.1;
 
-      if (safeOutPoint - newInPoint < minDuration) {
-        safeOutPoint = newInPoint + minDuration;
+      if (safeOutPoint - safeInPoint < minDuration) {
+        safeOutPoint = safeInPoint + minDuration;
       }
 
-      const newDuration = safeOutPoint - newInPoint;
+      const newDuration = safeOutPoint - safeInPoint;
 
       return {
         ...c,
-        inPoint: newInPoint,
+        inPoint: safeInPoint,
         outPoint: safeOutPoint,
         duration: newDuration,
       };
@@ -628,6 +647,10 @@ export function useProject() {
    * @returns The ID of the newly created second clip, or null if the split is invalid (e.g., too close to edges).
    */
   const splitClip = useCallback((clipId: string, splitTime: number): string | null => {
+    if (!Number.isFinite(splitTime)) {
+      return null;
+    }
+
     const clip = clips.find(c => c.id === clipId);
     if (!clip) return null;
 
