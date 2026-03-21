@@ -735,7 +735,23 @@ export default function Home() {
     setPreviewAssetId(null);
   }, []);
 
-  // Handle AI edit (using FFmpeg on video assets)
+  /**
+   * Applies an AI-driven FFmpeg edit command to a target video asset.
+   *
+   * **Why this implements an asset replacement pattern (healing):**
+   * FFmpeg processing is destructive (it modifies the video). Instead of overwriting
+   * the original asset on disk (which would break the undo stack and history),
+   * the backend creates a *new* asset for the edited video.
+   * This function handles the "healing" process:
+   * 1. It determines the target asset (prioritizing the explicitly selected clip, or falling back to the first video).
+   * 2. It sends the command to the local FFmpeg server.
+   * 3. Upon success, it fetches the newly generated asset via `refreshAssets()`.
+   * 4. It scans the entire timeline for any clips referencing the *old* asset ID and updates them
+   *    to point to the *new* asset ID via `updateClip()`, maintaining seamless playback continuity.
+   * 5. Finally, it persists these changes via `saveProject()`.
+   *
+   * @param command - The natural language command or specific edit instruction for the FFmpeg processor.
+   */
   const handleApplyEdit = useCallback(async (command: string) => {
     if (!session?.sessionId) {
       throw new Error('Please upload a video first');
