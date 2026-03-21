@@ -128,7 +128,7 @@ export default function MotionGraphicsPanel({ onAddToTimeline }: MotionGraphicsP
               type="text"
               value={(templateProps.text || '') as string}
               onChange={(e) => handleUpdateProp('text', e.target.value)}
-              className="w-full px-3 py-2 bg-zinc-800 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand-500/50"
+              className="w-full px-3 py-2 bg-zinc-800 rounded-lg text-sm focus:outline-none focus:border-brand-500/50 focus:ring-2 focus:ring-brand-500/50"
             />
           </div>
         )}
@@ -140,7 +140,7 @@ export default function MotionGraphicsPanel({ onAddToTimeline }: MotionGraphicsP
               type="text"
               value={(templateProps.name || '') as string}
               onChange={(e) => handleUpdateProp('name', e.target.value)}
-              className="w-full px-3 py-2 bg-zinc-800 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand-500/50"
+              className="w-full px-3 py-2 bg-zinc-800 rounded-lg text-sm focus:outline-none focus:border-brand-500/50 focus:ring-2 focus:ring-brand-500/50"
             />
           </div>
         )}
@@ -152,7 +152,7 @@ export default function MotionGraphicsPanel({ onAddToTimeline }: MotionGraphicsP
               type="text"
               value={(templateProps.title || '') as string}
               onChange={(e) => handleUpdateProp('title', e.target.value)}
-              className="w-full px-3 py-2 bg-zinc-800 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand-500/50"
+              className="w-full px-3 py-2 bg-zinc-800 rounded-lg text-sm focus:outline-none focus:border-brand-500/50 focus:ring-2 focus:ring-brand-500/50"
             />
           </div>
         )}
@@ -166,7 +166,7 @@ export default function MotionGraphicsPanel({ onAddToTimeline }: MotionGraphicsP
                 type="number"
                 value={(templateProps.value || 0) as number}
                 onChange={(e) => handleUpdateProp('value', Number(e.target.value))}
-                className="w-full px-3 py-2 bg-zinc-800 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand-500/50"
+                className="w-full px-3 py-2 bg-zinc-800 rounded-lg text-sm focus:outline-none focus:border-brand-500/50 focus:ring-2 focus:ring-brand-500/50"
               />
             </div>
             <div className="grid grid-cols-2 gap-2">
@@ -177,7 +177,7 @@ export default function MotionGraphicsPanel({ onAddToTimeline }: MotionGraphicsP
                   value={(templateProps.prefix || '') as string}
                   onChange={(e) => handleUpdateProp('prefix', e.target.value)}
                   placeholder="$"
-                  className="w-full px-3 py-2 bg-zinc-800 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand-500/50"
+                  className="w-full px-3 py-2 bg-zinc-800 rounded-lg text-sm focus:outline-none focus:border-brand-500/50 focus:ring-2 focus:ring-brand-500/50"
                 />
               </div>
               <div>
@@ -187,7 +187,7 @@ export default function MotionGraphicsPanel({ onAddToTimeline }: MotionGraphicsP
                   value={(templateProps.suffix || '') as string}
                   onChange={(e) => handleUpdateProp('suffix', e.target.value)}
                   placeholder="+"
-                  className="w-full px-3 py-2 bg-zinc-800 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand-500/50"
+                  className="w-full px-3 py-2 bg-zinc-800 rounded-lg text-sm focus:outline-none focus:border-brand-500/50 focus:ring-2 focus:ring-brand-500/50"
                 />
               </div>
             </div>
@@ -202,7 +202,7 @@ export default function MotionGraphicsPanel({ onAddToTimeline }: MotionGraphicsP
               type="text"
               value={(templateProps.label || '') as string}
               onChange={(e) => handleUpdateProp('label', e.target.value)}
-              className="w-full px-3 py-2 bg-zinc-800 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand-500/50"
+              className="w-full px-3 py-2 bg-zinc-800 rounded-lg text-sm focus:outline-none focus:border-brand-500/50 focus:ring-2 focus:ring-brand-500/50"
             />
           </div>
         )}
@@ -216,7 +216,7 @@ export default function MotionGraphicsPanel({ onAddToTimeline }: MotionGraphicsP
                 type="text"
                 value={(templateProps.logoText || '') as string}
                 onChange={(e) => handleUpdateProp('logoText', e.target.value)}
-                className="w-full px-3 py-2 bg-zinc-800 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand-500/50"
+                className="w-full px-3 py-2 bg-zinc-800 rounded-lg text-sm focus:outline-none focus:border-brand-500/50 focus:ring-2 focus:ring-brand-500/50"
               />
             </div>
             <div>
@@ -225,7 +225,7 @@ export default function MotionGraphicsPanel({ onAddToTimeline }: MotionGraphicsP
                 type="text"
                 value={(templateProps.tagline || '') as string}
                 onChange={(e) => handleUpdateProp('tagline', e.target.value)}
-                className="w-full px-3 py-2 bg-zinc-800 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand-500/50"
+                className="w-full px-3 py-2 bg-zinc-800 rounded-lg text-sm focus:outline-none focus:border-brand-500/50 focus:ring-2 focus:ring-brand-500/50"
               />
             </div>
           </>
@@ -240,7 +240,7 @@ export default function MotionGraphicsPanel({ onAddToTimeline }: MotionGraphicsP
                 value={(templateProps.quote || '') as string}
                 onChange={(e) => handleUpdateProp('quote', e.target.value)}
                 rows={2}
-                className="w-full px-3 py-2 bg-zinc-800 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand-500/50 resize-none"
+                className="w-full px-3 py-2 bg-zinc-800 rounded-lg text-sm focus:outline-none focus:border-brand-500/50 focus:ring-2 focus:ring-brand-500/50 resize-none"
               />
             </div>
             <div>
@@ -249,7 +249,7 @@ export default function MotionGraphicsPanel({ onAddToTimeline }: MotionGraphicsP
                 type="text"
                 value={(templateProps.author || '') as string}
                 onChange={(e) => handleUpdateProp('author', e.target.value)}
-                className="w-full px-3 py-2 bg-zinc-800 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand-500/50"
+                className="w-full px-3 py-2 bg-zinc-800 rounded-lg text-sm focus:outline-none focus:border-brand-500/50 focus:ring-2 focus:ring-brand-500/50"
               />
             </div>
             <div>
@@ -258,7 +258,7 @@ export default function MotionGraphicsPanel({ onAddToTimeline }: MotionGraphicsP
                 type="text"
                 value={(templateProps.role || '') as string}
                 onChange={(e) => handleUpdateProp('role', e.target.value)}
-                className="w-full px-3 py-2 bg-zinc-800 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand-500/50"
+                className="w-full px-3 py-2 bg-zinc-800 rounded-lg text-sm focus:outline-none focus:border-brand-500/50 focus:ring-2 focus:ring-brand-500/50"
               />
             </div>
           </>
@@ -288,7 +288,7 @@ export default function MotionGraphicsPanel({ onAddToTimeline }: MotionGraphicsP
                 type="text"
                 value={(templateProps.beforeLabel || '') as string}
                 onChange={(e) => handleUpdateProp('beforeLabel', e.target.value)}
-                className="w-full px-3 py-2 bg-zinc-800 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand-500/50"
+                className="w-full px-3 py-2 bg-zinc-800 rounded-lg text-sm focus:outline-none focus:border-brand-500/50 focus:ring-2 focus:ring-brand-500/50"
               />
             </div>
             <div>
@@ -297,7 +297,7 @@ export default function MotionGraphicsPanel({ onAddToTimeline }: MotionGraphicsP
                 type="text"
                 value={(templateProps.afterLabel || '') as string}
                 onChange={(e) => handleUpdateProp('afterLabel', e.target.value)}
-                className="w-full px-3 py-2 bg-zinc-800 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand-500/50"
+                className="w-full px-3 py-2 bg-zinc-800 rounded-lg text-sm focus:outline-none focus:border-brand-500/50 focus:ring-2 focus:ring-brand-500/50"
               />
             </div>
           </div>
@@ -326,7 +326,7 @@ export default function MotionGraphicsPanel({ onAddToTimeline }: MotionGraphicsP
               type="text"
               value={(templateProps.url || '') as string}
               onChange={(e) => handleUpdateProp('url', e.target.value)}
-              className="w-full px-3 py-2 bg-zinc-800 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand-500/50"
+              className="w-full px-3 py-2 bg-zinc-800 rounded-lg text-sm focus:outline-none focus:border-brand-500/50 focus:ring-2 focus:ring-brand-500/50"
             />
           </div>
         )}
