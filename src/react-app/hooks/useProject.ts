@@ -503,14 +503,24 @@ export function useProject() {
       console.warn(`Asset ${assetId} not found in state, using default duration`);
     }
 
+    const safeStart = Number.isFinite(start) ? Math.max(0, start) : 0;
+    const safeDuration = Number.isFinite(clipDuration) ? Math.max(0.1, clipDuration) : 5;
+    const safeInPoint = Number.isFinite(inPoint) ? Math.max(0, inPoint as number) : 0;
+    let safeOutPoint = Number.isFinite(outPoint) ? Math.max(0, outPoint as number) : safeDuration;
+
+    // Ensure outPoint is greater than inPoint
+    if (safeOutPoint <= safeInPoint) {
+      safeOutPoint = safeInPoint + safeDuration;
+    }
+
     const clip: TimelineClip = {
       id: crypto.randomUUID(),
       assetId,
       trackId,
-      start,
-      duration: clipDuration,
-      inPoint: inPoint ?? 0,
-      outPoint: outPoint ?? clipDuration,
+      start: safeStart,
+      duration: safeDuration,
+      inPoint: safeInPoint,
+      outPoint: safeOutPoint,
     };
 
     snapshotClips(); // Snapshot before adding
@@ -576,9 +586,10 @@ export function useProject() {
     // Snapshot should be called by onDragStart in the UI.
     setClipsInternal((prev: TimelineClip[]) => prev.map((c: TimelineClip) => {
       if (c.id !== clipId) return c;
+      const safeStart = Number.isFinite(newStart) ? Math.max(0, newStart) : c.start;
       return {
         ...c,
-        start: Math.max(0, newStart),
+        start: safeStart,
         trackId: newTrackId ?? c.trackId,
       };
     }));
@@ -590,18 +601,19 @@ export function useProject() {
     setClipsInternal((prev: TimelineClip[]) => prev.map(c => {
       if (c.id !== clipId) return c;
 
-      let safeOutPoint = newOutPoint;
       const minDuration = 0.1;
+      const safeInPoint = Number.isFinite(newInPoint) ? Math.max(0, newInPoint) : c.inPoint;
+      let safeOutPoint = Number.isFinite(newOutPoint) ? Math.max(safeInPoint + minDuration, newOutPoint) : c.outPoint;
 
-      if (safeOutPoint - newInPoint < minDuration) {
-        safeOutPoint = newInPoint + minDuration;
+      if (safeOutPoint - safeInPoint < minDuration) {
+        safeOutPoint = safeInPoint + minDuration;
       }
 
-      const newDuration = safeOutPoint - newInPoint;
+      const newDuration = safeOutPoint - safeInPoint;
 
       return {
         ...c,
-        inPoint: newInPoint,
+        inPoint: safeInPoint,
         outPoint: safeOutPoint,
         duration: newDuration,
       };
@@ -628,6 +640,8 @@ export function useProject() {
    * @returns The ID of the newly created second clip, or null if the split is invalid (e.g., too close to edges).
    */
   const splitClip = useCallback((clipId: string, splitTime: number): string | null => {
+    if (!Number.isFinite(splitTime)) return null;
+
     const clip = clips.find(c => c.id === clipId);
     if (!clip) return null;
 
