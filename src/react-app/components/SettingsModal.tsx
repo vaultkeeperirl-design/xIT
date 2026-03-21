@@ -201,7 +201,7 @@ function ApiKeyInput({
         value={value}
         onChange={(e) => onChange(e.target.value)}
         placeholder={isSet ? '••••••••••••••••••••••••' : 'Enter API Key starting with...'}
-        className="w-full px-3 py-2 bg-zinc-950 border border-zinc-800 rounded-lg text-white placeholder-zinc-600 focus:outline-none focus:border-brand-500/50 focus:ring-1 focus:ring-brand-500/50 transition-all text-sm font-mono"
+        className="w-full px-3 py-2 bg-zinc-950 border border-zinc-800 rounded-lg text-white placeholder-zinc-600 focus:outline-none focus:border-brand-500/50 focus:ring-2 focus:ring-brand-500/50 transition-all text-sm font-mono"
       />
       <p className="text-xs text-zinc-500">
         {description}

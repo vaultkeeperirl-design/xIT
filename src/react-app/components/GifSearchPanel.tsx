@@ -134,7 +134,7 @@ export default function GifSearchPanel({ sessionId, onClose, onGifAdded }: GifSe
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="Search for memes, reactions, GIFs..."
-                className="w-full pl-10 pr-4 py-2.5 bg-zinc-800 border border-zinc-700 rounded-lg text-white placeholder-zinc-500 focus:outline-none focus:border-brand-500 transition-colors"
+                className="w-full pl-10 pr-4 py-2.5 bg-zinc-800 border border-zinc-700 rounded-lg text-white placeholder-zinc-500 focus:outline-none focus:border-brand-500/50 focus:ring-2 focus:ring-brand-500/50 transition-colors"
               />
             </div>
             <button
