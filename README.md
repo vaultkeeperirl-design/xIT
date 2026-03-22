@@ -30,6 +30,7 @@ xIT is a standalone portable Windows application. No installation is required.
 *   **Dead Air Removal:** Utilizes a single-pass FFmpeg `filter_complex` (trim + concat) to synchronously remove silent segments without generating intermediate files, avoiding audio/video desync and disk I/O bottlenecks.
 *   **Session Management:** To prevent race conditions during bulk file uploads (e.g., drag-and-drop), the client uses a shared promise acting as a singleton for session creation (`/session/create`). This ensures concurrent upload requests all bind to a single active backend session, avoiding orphaned processing state.
 *   **Auto-Reframe (Face Tracking):** A hybrid architecture utilizing Python with `mediapipe` (via the local Node server) for tracking data, combined with mathematically derived client-side CSS transforms to dynamically keep the subject centered when exporting 16:9 content to 9:16 vertical formats without black bars.
+*   **Animation Editing:** Edits AI-generated animations in-place by mutating Remotion scene data JSON and re-rendering, preventing asset creep and disk bloat while preserving undo history.
 *   **Rendering:** Remotion for programmatic video creation.
 *   **Wrapper:** Electron for desktop integration.
 

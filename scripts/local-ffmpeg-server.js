@@ -4590,8 +4590,25 @@ ${attachedAssetIds?.length ? `- IMPORTANT: Include media scenes to showcase the 
   }
 }
 
-// Edit an existing animation with a new prompt
-// Takes the original scene data and modifies it based on the prompt
+/**
+ * Modifies an existing AI-generated Remotion animation using a new user prompt.
+ *
+ * **Why it edits in-place (reusing the asset ID):**
+ * Unlike destructive FFmpeg operations that generate new assets (causing "asset creep"),
+ * this workflow modifies the `sceneData` JSON payload and overwrites the existing video file.
+ * This preserves undo history and prevents massive memory/disk bloat from successive edits.
+ *
+ * **Context Gathering:**
+ * 1. **Primary Video Context:** Searches for the primary `v1Context` video clip. If found,
+ *    it transcribes the video (via local Whisper or Gemini) and provides up to 1500 characters
+ *    of the transcript to the LLM so it can synchronize the animation with spoken audio.
+ * 2. **Asset Context:** Passes a list of `availableAssets` to the LLM, enabling the user
+ *    to command the LLM to place specific images or videos directly into the newly generated scenes.
+ *
+ * @param {import('http').IncomingMessage} req
+ * @param {import('http').ServerResponse} res
+ * @param {string} sessionId
+ */
 async function handleEditAnimation(req, res, sessionId) {
   const session = getSession(sessionId);
   if (!session) {
