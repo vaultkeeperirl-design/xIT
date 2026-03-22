@@ -116,7 +116,7 @@ export default function CaptionPropertiesPanel({
           <select
             value={style.fontFamily}
             onChange={(e) => handleFontChange(e.target.value)}
-            className="w-full px-2 py-1.5 bg-zinc-800 border border-zinc-700 rounded text-xs text-white"
+            className="w-full px-2 py-1.5 bg-zinc-800 border border-zinc-700 rounded text-xs text-white focus:outline-none focus:border-brand-500/50 focus:ring-2 focus:ring-brand-500/50 transition-all"
           >
             {FONT_OPTIONS.map(opt => (
               <option key={opt.value} value={opt.value}>{opt.label}</option>
@@ -235,7 +235,7 @@ export default function CaptionPropertiesPanel({
           <select
             value={style.animation}
             onChange={(e) => handleAnimationChange(e.target.value as CaptionStyle['animation'])}
-            className="w-full px-2 py-1.5 bg-zinc-800 border border-zinc-700 rounded text-xs text-white"
+            className="w-full px-2 py-1.5 bg-zinc-800 border border-zinc-700 rounded text-xs text-white focus:outline-none focus:border-brand-500/50 focus:ring-2 focus:ring-brand-500/50 transition-all"
           >
             {ANIMATION_OPTIONS.map(opt => (
               <option key={opt.value} value={opt.value}>{opt.label}</option>
