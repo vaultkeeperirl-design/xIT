@@ -2069,6 +2069,7 @@ async function handleProjectRender(req, res, sessionId) {
     let audioFilter = '';
     if (audioClips.length > 0) {
       const audioInputs = [];
+      const audioLabels = [];
       for (const clip of audioClips) {
         const asset = session.assets.get(clip.assetId);
         if (!asset) continue;
@@ -2079,11 +2080,12 @@ async function handleProjectRender(req, res, sessionId) {
         const outPoint = clip.outPoint || asset.duration;
 
         audioInputs.push(`[${idx}:a]atrim=${inPoint}:${outPoint},asetpts=PTS-STARTPTS,adelay=${Math.floor(clip.start * 1000)}|${Math.floor(clip.start * 1000)}[a${idx}]`);
+        audioLabels.push(`[a${idx}]`);
       }
 
       if (audioInputs.length > 0) {
         filterParts.push(...audioInputs);
-        const audioMix = audioInputs.map((_, i) => `[a${clips.indexOf(audioClips[i]) + videoClips.length}]`).join('');
+        const audioMix = audioLabels.join('');
         filterParts.push(`${audioMix}amix=inputs=${audioInputs.length}[aout]`);
         audioFilter = '-map [aout]';
       }
