@@ -494,7 +494,7 @@ export function useProject() {
     // For video/audio, use asset duration
     // If asset not found (race condition with refreshAssets), use provided duration or default
     let clipDuration: number;
-    if (duration !== undefined) {
+    if (duration !== undefined && Number.isFinite(duration) && duration > 0) {
       clipDuration = duration;
     } else if (asset) {
       clipDuration = asset.type === 'image' ? 5 : asset.duration;
@@ -503,14 +503,18 @@ export function useProject() {
       console.warn(`Asset ${assetId} not found in state, using default duration`);
     }
 
+    const safeStart = Number.isFinite(start) ? Math.max(0, start) : 0;
+    const safeInPoint = (inPoint !== undefined && Number.isFinite(inPoint)) ? Math.max(0, inPoint) : 0;
+    const safeOutPoint = (outPoint !== undefined && Number.isFinite(outPoint)) ? Math.max(safeInPoint + 0.1, outPoint) : clipDuration;
+
     const clip: TimelineClip = {
       id: crypto.randomUUID(),
       assetId,
       trackId,
-      start,
+      start: safeStart,
       duration: clipDuration,
-      inPoint: inPoint ?? 0,
-      outPoint: outPoint ?? clipDuration,
+      inPoint: safeInPoint,
+      outPoint: safeOutPoint,
     };
 
     snapshotClips(); // Snapshot before adding
@@ -578,7 +582,7 @@ export function useProject() {
       if (c.id !== clipId) return c;
       return {
         ...c,
-        start: Math.max(0, newStart),
+        start: Number.isFinite(newStart) ? Math.max(0, newStart) : c.start,
         trackId: newTrackId ?? c.trackId,
       };
     }));
@@ -590,18 +594,19 @@ export function useProject() {
     setClipsInternal((prev: TimelineClip[]) => prev.map(c => {
       if (c.id !== clipId) return c;
 
-      let safeOutPoint = newOutPoint;
+      const safeInPoint = Number.isFinite(newInPoint) ? Math.max(0, newInPoint) : c.inPoint;
+      let safeOutPoint = Number.isFinite(newOutPoint) ? newOutPoint : c.outPoint;
       const minDuration = 0.1;
 
-      if (safeOutPoint - newInPoint < minDuration) {
-        safeOutPoint = newInPoint + minDuration;
+      if (safeOutPoint - safeInPoint < minDuration) {
+        safeOutPoint = safeInPoint + minDuration;
       }
 
-      const newDuration = safeOutPoint - newInPoint;
+      const newDuration = safeOutPoint - safeInPoint;
 
       return {
         ...c,
-        inPoint: newInPoint,
+        inPoint: safeInPoint,
         outPoint: safeOutPoint,
         duration: newDuration,
       };
@@ -628,6 +633,8 @@ export function useProject() {
    * @returns The ID of the newly created second clip, or null if the split is invalid (e.g., too close to edges).
    */
   const splitClip = useCallback((clipId: string, splitTime: number): string | null => {
+    if (!Number.isFinite(splitTime)) return null;
+
     const clip = clips.find(c => c.id === clipId);
     if (!clip) return null;
 
@@ -1184,7 +1191,7 @@ export function useProject() {
         await fetch(`${LOCAL_FFMPEG_URL}/session/${session.sessionId}`, {
           method: 'DELETE',
         });
-      } catch {}
+      } catch (e) { console.error("Error closing session", e); }
     }
     setSession(null);
     setAssets([]);
