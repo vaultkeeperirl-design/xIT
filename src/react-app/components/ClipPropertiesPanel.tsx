@@ -157,7 +157,7 @@ export default function ClipPropertiesPanel({
                 type="number"
                 value={transform.x ?? 0}
                 onChange={(e) => handlePositionChange('x', parseFloat(e.target.value) || 0)}
-                className="w-full px-2 py-1 bg-zinc-800 border border-zinc-700 rounded text-xs text-white"
+                className="w-full px-2 py-1 bg-zinc-800 border border-zinc-700 rounded text-xs text-white focus:outline-none focus:border-brand-500/50 focus:ring-2 focus:ring-brand-500/50 transition-all"
               />
             </div>
             <div>
@@ -166,7 +166,7 @@ export default function ClipPropertiesPanel({
                 type="number"
                 value={transform.y ?? 0}
                 onChange={(e) => handlePositionChange('y', parseFloat(e.target.value) || 0)}
-                className="w-full px-2 py-1 bg-zinc-800 border border-zinc-700 rounded text-xs text-white"
+                className="w-full px-2 py-1 bg-zinc-800 border border-zinc-700 rounded text-xs text-white focus:outline-none focus:border-brand-500/50 focus:ring-2 focus:ring-brand-500/50 transition-all"
               />
             </div>
           </div>
@@ -187,7 +187,7 @@ export default function ClipPropertiesPanel({
                 max="50"
                 value={transform.cropTop ?? 0}
                 onChange={(e) => handleCropChange('cropTop', parseFloat(e.target.value) || 0)}
-                className="w-full px-2 py-1 bg-zinc-800 border border-zinc-700 rounded text-xs text-white"
+                className="w-full px-2 py-1 bg-zinc-800 border border-zinc-700 rounded text-xs text-white focus:outline-none focus:border-brand-500/50 focus:ring-2 focus:ring-brand-500/50 transition-all"
               />
             </div>
             <div>
@@ -198,7 +198,7 @@ export default function ClipPropertiesPanel({
                 max="50"
                 value={transform.cropBottom ?? 0}
                 onChange={(e) => handleCropChange('cropBottom', parseFloat(e.target.value) || 0)}
-                className="w-full px-2 py-1 bg-zinc-800 border border-zinc-700 rounded text-xs text-white"
+                className="w-full px-2 py-1 bg-zinc-800 border border-zinc-700 rounded text-xs text-white focus:outline-none focus:border-brand-500/50 focus:ring-2 focus:ring-brand-500/50 transition-all"
               />
             </div>
             <div>
@@ -209,7 +209,7 @@ export default function ClipPropertiesPanel({
                 max="50"
                 value={transform.cropLeft ?? 0}
                 onChange={(e) => handleCropChange('cropLeft', parseFloat(e.target.value) || 0)}
-                className="w-full px-2 py-1 bg-zinc-800 border border-zinc-700 rounded text-xs text-white"
+                className="w-full px-2 py-1 bg-zinc-800 border border-zinc-700 rounded text-xs text-white focus:outline-none focus:border-brand-500/50 focus:ring-2 focus:ring-brand-500/50 transition-all"
               />
             </div>
             <div>
@@ -220,7 +220,7 @@ export default function ClipPropertiesPanel({
                 max="50"
                 value={transform.cropRight ?? 0}
                 onChange={(e) => handleCropChange('cropRight', parseFloat(e.target.value) || 0)}
-                className="w-full px-2 py-1 bg-zinc-800 border border-zinc-700 rounded text-xs text-white"
+                className="w-full px-2 py-1 bg-zinc-800 border border-zinc-700 rounded text-xs text-white focus:outline-none focus:border-brand-500/50 focus:ring-2 focus:ring-brand-500/50 transition-all"
               />
             </div>
           </div>

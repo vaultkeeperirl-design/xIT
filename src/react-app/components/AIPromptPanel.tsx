@@ -2654,7 +2654,7 @@ const AIPromptPanel = forwardRef<AIPromptPanelHandle, AIPromptPanelProps>(({
               <select
                 value={captionOptions.fontFamily}
                 onChange={(e) => setCaptionOptions(prev => ({ ...prev, fontFamily: e.target.value }))}
-                className="flex-1 px-2 py-1.5 bg-zinc-700 border border-zinc-600 rounded text-xs text-white"
+                className="flex-1 px-2 py-1.5 bg-zinc-700 border border-zinc-600 rounded text-xs text-white focus:outline-none focus:border-brand-500/50 focus:ring-1 focus:ring-brand-500/50 transition-all"
               >
                 {FONT_OPTIONS.map(font => (
                   <option key={font} value={font}>{font}</option>
