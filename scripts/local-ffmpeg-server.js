@@ -1191,7 +1191,23 @@ async function handleSessionProcess(req, res, sessionId) {
   }
 }
 
-// Remove dead air within a session
+/**
+ * Removes dead air (silence) from the active session's primary video.
+ *
+ * **Why this workflow exists:**
+ * Unlike the single-pass `filter_complex` approach used for stateless uploads (which maps directly in memory),
+ * the session-based dead air removal splits the video into distinct temporary segments on disk and concatenates them.
+ * This ensures that intermediate artifacts are contained within the isolated session directory (`session.dir`),
+ * allowing them to be tracked, reused, or purged cleanly when the session expires, preventing global tmpdir bloat.
+ *
+ * **Asset Resolution Strategy:**
+ * It prioritizes the original (non-AI-generated) video to avoid compounding compression artifacts from
+ * successive edits. If the original cannot be found (e.g., deleted), it falls back to any available video asset.
+ *
+ * @param {import('http').IncomingMessage} req
+ * @param {import('http').ServerResponse} res
+ * @param {string} sessionId
+ */
 async function handleSessionRemoveDeadAir(req, res, sessionId) {
   const session = getSession(sessionId);
   if (!session) {
