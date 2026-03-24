@@ -509,7 +509,7 @@ export default function Home() {
     }
 
     // Images need a default duration (5 seconds) since they don't have inherent duration
-    const clipDuration = asset.type === 'image' ? 5 : asset.duration;
+    const clipDuration = asset.type === 'image' ? 5 : (Number.isFinite(asset.duration) ? asset.duration : 5);
 
     // Check if we're on an edit tab (not main)
     if (activeTabId !== 'main') {
