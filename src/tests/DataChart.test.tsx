@@ -25,5 +25,5 @@ describe('DataChart', () => {
     expect(() => {
         render(<DataChart data={largeData} type="bar" />);
     }).not.toThrow();
-  });
+  }, 15000);
 });

@@ -24,10 +24,10 @@ xIT is a standalone portable Windows application. No installation is required.
 
 ## Architecture
 
-*   **Smart Assistant Routing:** Uses context-aware heuristics (e.g., active timeline tab, selected assets) combined with intent parsing to dynamically route natural language prompts to specific editing workflows (like Remotion animations vs. FFmpeg video manipulation).
+*   **Smart Assistant Routing:** Uses context-aware heuristics (e.g., active timeline tab, selected assets) combined with intent parsing to dynamically route natural language prompts to specific editing workflows (like Remotion animations vs. FFmpeg video manipulation). This design choice prioritizes context over intent to heavily disambiguate simple verbs like "edit" or "change", drastically reducing false positives in prompt processing.
 *   **Frontend:** React 19, TailwindCSS, Vite.
 *   **Backend/Processing:** Local Node.js server (`scripts/local-ffmpeg-server.js`) spawning FFmpeg processes.
-*   **Dead Air Removal:** Utilizes a single-pass FFmpeg `filter_complex` (trim + concat) to synchronously remove silent segments without generating intermediate files, avoiding audio/video desync and disk I/O bottlenecks.
+*   **Dead Air Removal:** Utilizes a single-pass FFmpeg `filter_complex` (trim + concat) for stateless processing. However, session-based dead air removal (`handleSessionRemoveDeadAir`) explicitly uses a disk-based split and concat approach. Why? It isolates intermediate artifacts within the session directory, ensuring robust processing for large files that might otherwise exceed `filter_complex` memory limits or cause stream mapping issues, while keeping cleanup isolated to the session.
 *   **Session Management:** To prevent race conditions during bulk file uploads (e.g., drag-and-drop), the client uses a shared promise acting as a singleton for session creation (`/session/create`). This ensures concurrent upload requests all bind to a single active backend session, avoiding orphaned processing state.
 *   **Auto-Reframe (Face Tracking):** A hybrid architecture utilizing Python with `mediapipe` (via the local Node server) for tracking data, combined with mathematically derived client-side CSS transforms to dynamically keep the subject centered when exporting 16:9 content to 9:16 vertical formats without black bars.
 *   **Animation Editing:** Edits AI-generated animations in-place by mutating Remotion scene data JSON and re-rendering, preventing asset creep and disk bloat while preserving undo history.
