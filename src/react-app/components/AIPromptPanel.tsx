@@ -922,12 +922,12 @@ const AIPromptPanel = forwardRef<AIPromptPanelHandle, AIPromptPanelProps>(({
    * @returns The resolved workflow type to handle the prompt.
    *
    * @remarks
-   * The routing engine prioritizes **Context** over **Intent**.
-   * Why? Words like "edit" or "change" are highly ambiguous. If a user says "edit this",
-   * we need to know *what* they are looking at. If they are on the "Animation" edit tab
-   * (`ctx.isOnEditTab && ctx.editTabHasAnimation`), "edit" means modifying Remotion properties.
-   * If they are on the main timeline, "edit" might mean an FFmpeg cut or auto-edit.
-   * By evaluating context first, we drastically reduce false positives in intent parsing.
+   * This function implements "Smart Assistant Routing" by utilizing a hybrid approach.
+   * It prioritizes context-aware heuristics (e.g., active timeline tab, currently selected assets)
+   * over natural language intent parsing. This is crucial because simple verbs like "edit" or "change"
+   * are highly ambiguous. By evaluating the UI context first, the function disambiguates the user's
+   * intent and correctly routes the prompt to the appropriate workflow (e.g., modifying a Remotion
+   * animation vs. performing a structural FFmpeg video edit), significantly reducing misinterpretations.
    *
    * **The decision-making hierarchy:**
    * 1. **Context-Aware Decisions (Highest Priority):** First checks if the user is in a specific state

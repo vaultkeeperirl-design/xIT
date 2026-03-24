@@ -1191,7 +1191,23 @@ async function handleSessionProcess(req, res, sessionId) {
   }
 }
 
-// Remove dead air within a session
+/**
+ * Handles session-based dead air removal for uploaded videos.
+ *
+ * This endpoint implements a multi-step disk-based workflow to remove silent segments
+ * from a video file without causing audio/video desync. Unlike stateless `filter_complex`
+ * approaches which can struggle with complex stream mapping or memory limits on large files,
+ * this approach splits the video into discrete non-silent segments on disk and concatenates
+ * them using FFmpeg's `concat` demuxer.
+ *
+ * The workflow isolates intermediate artifacts (split segments, concat lists) within
+ * the session directory (`session.dir`), allowing for clean tracking, debugging, and cleanup
+ * of temporary files without polluting the global temp space.
+ *
+ * @param {http.IncomingMessage} req - The HTTP request containing configuration (e.g., silenceThreshold).
+ * @param {http.ServerResponse} res - The HTTP response to send the result or error.
+ * @param {string} sessionId - The active session ID to bind the operation to.
+ */
 async function handleSessionRemoveDeadAir(req, res, sessionId) {
   const session = getSession(sessionId);
   if (!session) {
