@@ -497,7 +497,7 @@ export function useProject() {
     if (duration !== undefined && Number.isFinite(duration) && duration > 0) {
       clipDuration = duration;
     } else if (asset) {
-      clipDuration = asset.type === 'image' ? 5 : asset.duration;
+      clipDuration = asset.type === 'image' ? 5 : (Number.isFinite(asset.duration) ? asset.duration : 5);
     } else {
       clipDuration = 5; // Default fallback
       console.warn(`Asset ${assetId} not found in state, using default duration`);
