@@ -536,7 +536,20 @@ export function useProject() {
     ));
   }, [setClipsInternal]);
 
-  // Delete clip (with optional ripple/autosnap to shift subsequent clips)
+  /**
+   * Deletes a clip from the timeline and handles associated cleanup.
+   *
+   * **Why this is complex:**
+   * 1. **Data Cleanup:** When a clip is deleted, its associated `captionData` must also be
+   *    removed from the state to prevent memory leaks and orphaned caption rendering.
+   * 2. **Ripple Deletion:** If `ripple` is enabled, deleting a clip creates a "gap" in the timeline.
+   *    To close this gap, all subsequent clips *on the same track* that start after the deleted
+   *    clip's end time must be shifted backward by the exact duration of the deleted clip.
+   * 3. **Immutability:** Operations must return new arrays/objects to trigger React re-renders.
+   *
+   * @param clipId - The ID of the clip to delete.
+   * @param ripple - If true, shifts subsequent clips on the same track backward to close the gap.
+   */
   const deleteClip = useCallback((clipId: string, ripple: boolean = false): void => {
     snapshotClips(); // Snapshot before deleting
 
