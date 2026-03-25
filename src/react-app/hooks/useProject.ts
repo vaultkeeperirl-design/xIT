@@ -866,16 +866,18 @@ export function useProject() {
     style?: Partial<CaptionStyle>
   ): TimelineClip => {
     const clipId = crypto.randomUUID();
+    const safeStart = Number.isFinite(start) ? Math.max(0, start) : 0;
+    const safeDuration = Number.isFinite(duration) && duration > 0 ? duration : 5;
 
     // Create the timeline clip
     const clip: TimelineClip = {
       id: clipId,
       assetId: '', // No asset for captions
       trackId: 'T1',
-      start,
-      duration,
+      start: safeStart,
+      duration: safeDuration,
       inPoint: 0,
-      outPoint: duration,
+      outPoint: safeDuration,
     };
 
     // Store caption data separately
@@ -905,15 +907,17 @@ export function useProject() {
 
     for (const caption of captions) {
       const clipId = crypto.randomUUID();
+      const safeStart = Number.isFinite(caption.start) ? Math.max(0, caption.start) : 0;
+      const safeDuration = Number.isFinite(caption.duration) && caption.duration > 0 ? caption.duration : 5;
 
       newClips.push({
         id: clipId,
         assetId: '',
         trackId: 'T1',
-        start: caption.start,
-        duration: caption.duration,
+        start: safeStart,
+        duration: safeDuration,
         inPoint: 0,
-        outPoint: caption.duration,
+        outPoint: safeDuration,
       });
 
       newCaptionData[clipId] = {
