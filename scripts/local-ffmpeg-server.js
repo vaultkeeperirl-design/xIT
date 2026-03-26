@@ -1191,7 +1191,20 @@ async function handleSessionProcess(req, res, sessionId) {
   }
 }
 
-// Remove dead air within a session
+/**
+ * Removes dead air (silence) from a video within an active user session.
+ *
+ * **Why extract + concat instead of filter_complex?**
+ * Unlike the stateless `handleRemoveDeadAir` which uses a single-pass in-memory filter,
+ * this session-based approach explicitly uses a disk-based split and concat strategy.
+ * This isolates all intermediate artifacts (the individual non-silent segments) within
+ * the session directory (`session.dir`), allowing clean tracking, debugging, and
+ * reliable cleanup of temporary files associated with the user's project.
+ *
+ * @param {import('http').IncomingMessage} req
+ * @param {import('http').ServerResponse} res
+ * @param {string} sessionId
+ */
 async function handleSessionRemoveDeadAir(req, res, sessionId) {
   const session = getSession(sessionId);
   if (!session) {
