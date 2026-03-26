@@ -1,8 +1,8 @@
 
-> xit@1.1.5 dev
+> xit@1.1.19 dev
 > vite
 
-(node:4776) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+(node:5455) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
 (Use `node --trace-deprecation ...` to show where the warning was created)
 
   VITE v6.4.1  ready in 3996 ms

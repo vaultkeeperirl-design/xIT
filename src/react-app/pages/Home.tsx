@@ -110,13 +110,15 @@ export default function Home() {
   } = useProject();
 
   // Compute the active clips based on which tab is selected
+  const activeTabMemo = useMemo(() => timelineTabs.find(tab => tab.id === activeTabId), [timelineTabs, activeTabId]);
+
   const activeClips = useMemo(() => {
     if (activeTabId === 'main') {
       return clips;
     }
-    const activeTab = timelineTabs.find(tab => tab.id === activeTabId);
+    const activeTab = activeTabMemo;
     return activeTab?.clips || [];
-  }, [activeTabId, clips, timelineTabs]);
+  }, [activeTabId, clips, activeTabMemo]);
 
   // ⚡ Bolt: Cache assets in a Map to optimize asset retrieval from O(N) to O(1) during playback rendering
   // This reduces the complexity of generating preview layers from O(C * A) to O(C + A)
@@ -514,7 +516,7 @@ export default function Home() {
     // Check if we're on an edit tab (not main)
     if (activeTabId !== 'main') {
       // Add clip to the edit tab's clips array
-      const activeTab = timelineTabs.find(tab => tab.id === activeTabId);
+      const activeTab = activeTabMemo;
       if (activeTab) {
         const newClip: TimelineClip = {
           id: crypto.randomUUID(),
@@ -533,13 +535,13 @@ export default function Home() {
       addClip(asset.id, targetTrackId, time, clipDuration);
     }
     saveProject();
-  }, [addClip, saveProject, activeTabId, timelineTabs, updateTabClips]);
+  }, [addClip, saveProject, activeTabId, activeTabMemo, updateTabClips]);
 
   // Handle moving clip
   const handleMoveClip = useCallback((clipId: string, newStart: number, newTrackId?: string) => {
     // Check if we're on an edit tab
     if (activeTabId !== 'main') {
-      const activeTab = timelineTabs.find(tab => tab.id === activeTabId);
+      const activeTab = activeTabMemo;
       if (activeTab) {
         const updatedClips = activeTab.clips.map(clip => {
           if (clip.id === clipId) {
@@ -556,7 +558,7 @@ export default function Home() {
     } else {
       moveClip(clipId, newStart, newTrackId);
     }
-  }, [moveClip, activeTabId, timelineTabs, updateTabClips]);
+  }, [moveClip, activeTabId, activeTabMemo, updateTabClips]);
 
   // Handle resizing clip
   const handleResizeClip = useCallback((clipId: string, newInPoint: number, newOutPoint: number, newStart?: number) => {
@@ -564,7 +566,7 @@ export default function Home() {
 
     // Check if we're on an edit tab
     if (activeTabId !== 'main') {
-      const activeTab = timelineTabs.find(tab => tab.id === activeTabId);
+      const activeTab = activeTabMemo;
       if (activeTab) {
         const clip = activeTab.clips.find(c => c.id === clipId);
         if (!clip) return;
@@ -594,13 +596,13 @@ export default function Home() {
         start: newStart ?? clip.start,
       });
     }
-  }, [clips, updateClip, activeTabId, timelineTabs, updateTabClips]);
+  }, [clips, updateClip, activeTabId, activeTabMemo, updateTabClips]);
 
   // Handle deleting clip from timeline (with autoSnap/ripple support)
   const handleDeleteClip = useCallback((clipId: string) => {
     // Check if we're on an edit tab
     if (activeTabId !== 'main') {
-      const activeTab = timelineTabs.find(tab => tab.id === activeTabId);
+      const activeTab = activeTabMemo;
       if (activeTab) {
         const updatedClips = activeTab.clips.filter(c => c.id !== clipId);
         updateTabClips(activeTabId, updatedClips);
@@ -612,7 +614,7 @@ export default function Home() {
     if (selectedClipId === clipId) {
       setSelectedClipId(null);
     }
-  }, [deleteClip, selectedClipId, autoSnap, activeTabId, timelineTabs, updateTabClips]);
+  }, [deleteClip, selectedClipId, autoSnap, activeTabId, activeTabMemo, updateTabClips]);
 
   // Handle cutting clips at the playhead position
   const handleCutAtPlayhead = useCallback((trackId?: string | null) => {
@@ -2247,8 +2249,8 @@ export default function Home() {
                   currentTime={currentTime}
                   selectedClipId={selectedClipId}
                   activeTabId={activeTabId}
-                  editTabAssetId={activeTabId !== 'main' ? timelineTabs.find(t => t.id === activeTabId)?.assetId : undefined}
-                  editTabClips={activeTabId !== 'main' ? timelineTabs.find(t => t.id === activeTabId)?.clips : undefined}
+                  editTabAssetId={activeTabId !== 'main' ? activeTabMemo?.assetId : undefined}
+                  editTabClips={activeTabId !== 'main' ? activeTabMemo?.clips : undefined}
                 />
               </div>
               <div className={`absolute inset-0 ${activeAgent === 'image-lab' ? '' : 'hidden'}`}>
