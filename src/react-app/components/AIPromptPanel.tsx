@@ -2961,7 +2961,7 @@ const AIPromptPanel = forwardRef<AIPromptPanelHandle, AIPromptPanelProps>(({
                           value={timeRangeInputs.start}
                           onChange={(e) => setTimeRangeInputs(prev => ({ ...prev, start: e.target.value }))}
                           placeholder="0:00"
-                          className="flex-1 px-2 py-1.5 bg-zinc-700 border border-zinc-600 rounded text-xs text-white placeholder:text-zinc-500 focus:outline-none focus:border-brand-500/50 focus:ring-1 focus:ring-brand-500/50 transition-all"
+                          className="flex-1 px-2 py-1.5 bg-zinc-700 border border-zinc-600 rounded text-xs text-white placeholder:text-zinc-500 focus:outline-none focus:border-brand-500/50 focus:ring-2 focus:ring-brand-500/50 transition-all"
                         />
                       </div>
                       <div className="flex items-center gap-2">
@@ -2971,7 +2971,7 @@ const AIPromptPanel = forwardRef<AIPromptPanelHandle, AIPromptPanelProps>(({
                           value={timeRangeInputs.end}
                           onChange={(e) => setTimeRangeInputs(prev => ({ ...prev, end: e.target.value }))}
                           placeholder="1:30"
-                          className="flex-1 px-2 py-1.5 bg-zinc-700 border border-zinc-600 rounded text-xs text-white placeholder:text-zinc-500 focus:outline-none focus:border-brand-500/50 focus:ring-1 focus:ring-brand-500/50 transition-all"
+                          className="flex-1 px-2 py-1.5 bg-zinc-700 border border-zinc-600 rounded text-xs text-white placeholder:text-zinc-500 focus:outline-none focus:border-brand-500/50 focus:ring-2 focus:ring-brand-500/50 transition-all"
                         />
                       </div>
                     </div>
